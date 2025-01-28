@@ -1,0 +1,48 @@
+
+struct Seq := 
+   0 : O, 
+   succ : O(O);
+
+def isclosed( s : Seq, P : T(O) ) :=
+   P( s.0 ) & [ x : O ] P(x) -> P( s. succ(x) );
+
+// Def 1.2:
+
+def gen( s : Seq ) ( x : O ) :=
+   [ P : T(O) ] { strict(P) } -> isclosed( s, P ) -> P(x).
+
+// Correctnesss of induction:
+
+thm [ s : Seq, P : T(O) ] { stricton( s.gen, P ) } 
+   -> P( s.0 ) 
+      -> ( [x:O] { s. gen(x) } P(x) -> P( s. succ(x)) )
+         -> [ x: O ] { s. gen(x) } -> P(x)
+ 
+def homrel( s1, s2 : Seq ) ( P : T(O,O) ) :=
+   P( s1. 0, s2. 0 ) & 
+   [ x1, x2 : O ] { gen( s1, x1 ) & gen( s2, x2 ) } 
+      -> P(x1,x2) -> P( s1. succ(x1), s2. succ(x2) );
+
+def total( P : T(O), Q:T(O), R: T(O,O) ) :=
+   [ x : O ] { P(x) } -> < y : O > { Q(y) } & R(x,y);
+
+def functional( P : T(O), Q: T(O), R: T(O,O) ) :=
+   [ x : O ] { P(x) } -> [ y1, y2: O ] { Q(y1) & Q(y2) } -> 
+
+def minhomrel( s1 : Seq, s2: Seq )( x1:O, x2:O ) :=
+   [ P : T(O,O) ] { stricton( prod( s1.gen, s2.gen ), P ) }
+      -> homrel( s1, s2, P ) -> P(x1,x2) ;
+
+frm homomorphic [ s1, s2 : Seq ] stricton( prod( s1.gen, s2. gen ),
+                   minhomrel( s1, s2 ));
+
+frm prop( s1, s2 : Seq ) := ( s1, s2, minhomrel( s1, s2 ));
+   // A formula is either believed in, or proven.
+
+def freegen( s1 : Seq ) :=
+   [ s2 : Seq ] < P : T(O,O) > 
+      { strict( prod( s1. gen, s2. gen ), P ) } &
+      homerel( s1, s2, P ) & functional( s1. gen, s2. gen, P );
+
+( s1,   ) -> 
+
