@@ -1,0 +1,1321 @@
+
+\documentclass{article}
+\title{Manual of Maphoon~2021}
+\author{Hans de Nivelle}
+
+\begin{document}
+
+\maketitle
+\begin{abstract}
+   \noindent
+   Maphoon is a tool that automatically generates a 
+   working parser from the description of a grammar. 
+   Maphoon is written in $ C^{++}, $ and it constructs a parser 
+   in $ C^{++}. $ 
+   In its functionality, Maphoon is similar to Yacc or Bison.
+   The main improvement is that it allows the programmer to 
+   use all advantages of $ C^{++}-17. $ If the attribute classes
+   have correct resource management, the parser will automatically
+   have correct resource management as well. 
+   The developer of the parser does not need to know
+   anything about the internals of the attribute classes. 
+   Maphoon automatically generates a symbol class.  
+   Both the symbol class and the parser that it generates can be 
+   put in arbitrary namespace, and they have no static fields.
+   Maphoon can generate parsers that allow run time definition of operators,
+   as used for example by Prolog.
+   Maphoon comes with separate tokenizer generation tools, 
+   which are described in a separate document.
+
+   \noindent
+   This document describe the use of the system only. For the theory we
+   refer to \cite{Dragon2007}.
+   Maphoon is released with the 3-clause BSD license.
+\end{abstract}
+
+\section{Quick Start for the Impatient}
+
+If you only want to print parse tables, and check that a grammar
+is well-formed, then it is sufficient to prepare a single
+file with extension \verb+.m+ in the following format: 
+\begin{verbatim} 
+// Language with tricky lookaheads:
+
+%startsymbol S EOF    // Start symbol with end marker. 
+%symbol S EOF
+%symbol a b c A B
+
+%rules
+S =>  c b c a | A a A b ;
+A =>  B ;
+B =>  c ;  \end{verbatim}
+Call \verb+./maphoon impatient.m+. 
+Maphoon will analyse the file, and print the parse tables. 
+(The file is present in directory \verb|examples| under the name
+{\bf lalr.m}.) 
+
+\section{Design Goals}
+
+\noindent
+In the design of Maphoon, we tried to meet the following requirements:
+\begin{enumerate}
+\item
+   The resulting parser must use good quality $ C^{++}, $ 
+   and the user must be able to write the semantic actions 
+   in good quality $ C^{++}. $ Good quality means: 
+   When the attribute types handle their resource management 
+   properly (use RAII), the constructed parser will also do that. 
+
+\item
+   The parser must support attribute types that have
+   no copying operations, which means that they can only be moved.
+
+\item
+   The parser must correctly implement the algorithms of the 
+   dragon book (\cite{Dragon2007}).
+
+\item
+   It must be possible to extend the syntax at run time. Concretely,
+   we want to support the possiblity of defining Prolog-style operators 
+   (see Sterling~and~Shapiro \cite{SterlingShapiro94})
+   In Prolog, it is possible to declare \verb&op( '+', 'yfx', 200 ),& 
+   after which \verb|+| will be a leftassociative infix operator.
+   If one wants to allow such dynamic syntax extensions, parse 
+   conflicts cannot be resolved earlier than at run time. 
+   
+   \noindent
+   Maphoon solves the problem by attaching preconditions to 
+   reduction rules. Preconditions return a \verb+short int+
+   with the following meaning:
+   \begin{description}   
+   \item[1] Agree to be reduced. 
+   \item[0] Refuse to be reduced. 
+   \item[-1] Refuse to be reduced, and also block the shift
+      is there is one.
+   \end{description}
+   The general form of a conflict
+   is (Shift)$^m$ (Reduce)$^n$, where $ m \in \{ 0, 1 \}, $ 
+   $ n \geq 0, $ and $ m+n > 1. $
+   The conflict is between possibly one shift,
+   and an unbounded number of reductions. At parser generation time,
+   Maphoon stores all possibilities in the parse table
+   in the order specified by the user. 
+   At parse time, Maphoon will attempt the reductions
+   and perform the first reduction whose precondition returns
+   an integer $ > 0. $ 
+   If all preconditions return $ 0, $ it will perform the shift
+   if there is one. Otherwise, one of the preconditions returned $ -1, $
+   and the result is a syntax error. 
+   The possibility of blocking the shift was created 
+   in order to be able to enforce nonassociativity. 
+   A non-associative operator is an
+   operator that can neither shift nor reduce when
+   there is a conflict.
+\item
+   We want nice error reporting. A bottom-up parser, as generated
+   by Maphoon, detects an error at the earliest possible point,
+   which is as soon as it has become impossible to continue the
+   input in such a way that the final result will be syntactially correct.
+   We added an approach to error reporting where the presence of certain
+   symbols in the input triggers an expectation. This is not automatic.
+   The user specifies sequences of symbols with their resulting expectation.
+   When the parser gets stuck, it looks for the most recent trigger,
+   and reports what it expects, and what it received instead. In our
+   experience, this gives good error messages. 
+   
+\end{enumerate} 
+
+\section{Running Maphoon}
+
+Maphoon can be called with one, two or three arguments.
+The arguments are as follows:
+\begin{enumerate}
+\item
+   The first argument must a text file with extension \verb+.m+
+   or \verb+.M+. 
+   It must be the name of a text file containing the description of
+   a grammar, for which Maphoon will try to create a parser. 
+\item
+   If present, the second argument 
+   must be a directory, possibly the current
+   directory (\verb+.+), but never the directory of the Maphoon sources. 
+   In this directory, 
+   Maphoon will try to write files {\bf symbol.h}, 
+   {\bf symbol.cpp}, and possibly also
+   {\bf parser.h} and {\bf parser.cpp}. 
+   The first two files will contain a definition of \verb+struct symbol+.
+   The second two files will contain the parser. 
+   The output directory should not be the Maphoon source directory,
+   because it  also contain 
+   files {\bf symbol.h} and {\bf symbol.cpp}
+   which will be overwritten. 
+\item
+   If present, the third argument must be 
+   the position of the file \verb+idee.x+.
+   This file contains the starter code for the generated parser.
+   Without it, Maphoon will not be able to
+   generate files {\bf parser.h} and
+   {\bf parser.cpp}. 
+   It is normally the directory containing the Maphoon sources
+   (and the executable.) 
+\end{enumerate}
+
+\noindent
+The recommended use sequence is as follows:
+\begin{enumerate}
+\item
+   Prepare a file \verb+grammar.m+, and make sure that
+   Maphoon outputs tables. Check the warnings.
+   The best way to do this is to redirect the output, and
+   read the output in a file.  
+   Have a look at the parse tables, and check
+   that they look reasonable. 
+\item
+   Call Maphoon with a second argument, 
+   and let it generate the 
+   symbol class. 
+   Write the tokenizer, using \verb+symbol+ that was
+   produced by Maphoon. 
+   It is usually necessary to create additional symbols
+   (e.g. whitespace symbols) that do not occur in the grammar.
+   This will result in warnings. These can be ignored. 
+\item
+   When the tokenizer is complete, you can call Maphoon with
+   three arguments, start adding semantic actions, 
+   compile the parser and test it. 
+\end{enumerate}
+
+\section{Declaring Symbols}
+
+Maphoon automatically generates $ C^{++} $ code that defines
+a symbol class.
+The files are called {\bf symbol.cpp} and {\bf symbol.h}.
+They are written in a directory that is determined by the second command
+line argument. It is possible to specify a namespace for the
+symbol class with the \verb+%symbolspace+ command. 
+{\bf Warning}: Make sure that the output directory is not the
+directory of the Maphoon sources. 
+They also conctain files with names
+{\bf symbol.h} and {\bf symbol.cpp},
+and they will be overwritten.
+In order to declare a symbol, write
+\begin{verbatim}
+%symbol sym1 sym2 sym3  
+   // Declare symbols with trivial (void) attribute type.
+%symbol{ C++ type } sym1 sym2 sym3 
+   // Declare symbols with non-trivial attribute type. 
+\end{verbatim} 
+All symbols that occur in grammar rules must be
+declared, otherwise no parser and no symbol class will be generated.
+It is possible to declare symbols with type \verb+void+,
+which has the same effect as declaring them without type.
+The $C^{++} $-types should be value types, which implies that they should
+not be references. 
+They also should not be
+{\bf const}. Maphoon will warn when attribute types 
+are reference or {\bf const}.
+Pointers are possible but not recommended, because they
+don't have value semantics. 
+For efficiency, it is recommended that the
+types have efficient moving operators. 
+
+It is possible to declare symbols that do not occur
+in the grammar. This may sometimes be useful.
+For example, one could declare whitespace 
+comment tokens for internal use in the tokenizer,
+which will not be returned to the parser.
+Maphoon will list the declared, but unused symbols in a warning.
+
+\section{Managing Source Information}
+
+It is often useful to attach source information to symbols.
+This information can be used for generating error messages. 
+For simple parsers, one can report the current line number of
+the tokenizer, but this will not work for errors that are detected
+at a later stage, for example type checking errors. If one wants to 
+accurately report those, one needs to keep track of 
+the source of a symbol. 
+
+Maphoon views source information as an interval of file
+positions from the start of the symbol to the end of the symbol.
+When a grammar rule is reduced, the intervals of the right
+hand side symbols are merged to obtain the interval of the left
+hand side symbol. The user should create an interval class, 
+and define the merging operation, and make sure that
+the tokenizer includes the intervals.  The rest is automatic. 
+In case one does not care about intervals, it is sufficient
+to use only the start positions. In that case,
+the merging operator does not need to do anything.
+The steps are as follows:
+\begin{enumerate}
+\item
+   Create a location or interval class. 
+   The name can be chosen freely. For simplicity,
+   we assume the name is \verb+sourceinfo+. 
+   The \verb+sourceinfo+ class should be lightweight,
+   because it will be included in every symbol.
+   If you want to include a filename (or a stack of filenames),
+   then it is better to use a pointer. 
+   Class \verb+sourceinfo+ must be printable with \verb+operator <<+, 
+   and must have a \verb+merge+ method, whose
+   signature must be \verb+void merge( sourceinfo )+,
+   \verb+void merge( const sourceinfo& )+, or
+   \verb+void merge( sourceinfo&& )+. 
+   If the location contains only the start position,
+   the body can be empty.
+   For an interval class, the method must copy the end location
+   of its argument to the end location of \verb+this+.
+
+   In our experience, class \verb+sourceinfo+ is always simple enough
+   to be defined header only. 
+
+   The location class does not need to (and probably should not)
+   have a default constructor. 
+\item
+   Add \verb+%symbolcode_h{ #include "sourceinfo.h" }+ to the grammar,
+   so that the \verb+symbol+ class knows about it.
+\item
+   Add \verb+%infotype{ sourceinfo }+ to the grammar. 
+   The name \verb|sourceinfo| can changed to any name,
+   as the file {\bf sourceinfo.h}.  
+\item
+   Make sure that the tokenizer adds \verb+sourceinfo+
+   when it constructs a symbol. It is always the
+   second constructor argument after \verb+symbolval+. 
+\end{enumerate}
+
+\noindent
+When the grammar contains an infotype definition, the generated symbol class 
+has a field 
+\verb+std::optional< sourceinfo > info+, where \verb+sourceinfo+
+is the name of the source information class. 
+In addition, \verb+std::optional< sourceinfo >+ will become 
+the second parameter
+of every constructor of class \verb+symbol+,
+after the \verb+symbolval+.
+
+The \verb+info+ field has to be optional, 
+because symbols that originate
+from reducing a rule with empty right hand side \verb+Sym => ;+ have 
+no source information.
+
+At reduction time, the parser will try to 
+compute the info field of the left hand side from the info fields 
+of the right hand sides, by calling the \verb+merge+ method
+of the first right hand side symbol that has \verb+sourceinfo+, 
+with the others that have \verb+sourceinfo+. 
+The result will be copied into the left hand side.
+The user does not need to worry about this. 
+
+\section{Parameters}
+\label{Sect_parameters}
+
+\noindent
+It is possible to declare parameters 
+that will be included in the parser as reference fields, and
+which can be used in reduction code. 
+They can be used for example for storing type declarations,
+assignments to variables, for remembering the input file,
+for logging errors, etc. 
+If the tokenizer is defined as a class object, it has to be passed
+as parameter to the parser. If there is no separate tokenizer class, 
+the parser probably reads its input from a file, 
+and it will be necessary to pass this
+file as parameter. 
+A parameter declaration has the following form:
+\begin{verbatim}
+   %parameter { type } name \end{verbatim}
+Examples are: 
+\begin{verbatim}
+   %parameter{ std::map< std::string, double > } varstore
+   %parameter{ std::istream } inputsource 
+   %parameter{ std::vector< std::string > } errorlog \end{verbatim}
+Don't add a reference symbol \verb+&+ to the type, because 
+this is already done by Maphoon. It will complain if you try. 
+Pointers are possible. 
+The parameters become reference arguments of the constructor
+\verb+parser::parser( )+ in the same order in which they appear in
+the input file.
+When the parser is constructed, the constructor must be called 
+with reference arguments. 
+Note that there is no way of declaring local variables 
+whose scope is the complete parser. If one needs such a variable, 
+it must be declared
+as parameter and initialized outside of the parser.
+Using global variables is bad style, always use parameters.
+
+\section{Specifying the Tokenizer}
+\label{Sect_tokenizer}
+
+\noindent
+Symbols need to come from somewhere, and the place
+where they come from is usually called \emph{the tokenizer}.
+The input source is declared by writing
+\begin{verbatim}
+   %source { expr; }   
+\end{verbatim}
+Maphoon inserts \verb+lookahead = expr;+ whenever it needs
+a symbol. \verb+expr+ must include a semicolon at the end. 
+The expression must be such that it can be called from the namespace
+of the parser. 
+If no source is given,
+Maphoon will not generate a parser.
+
+Additional information needed by \verb+expr+ must be passed
+as parameters to the parser (See Section~\ref{Sect_parameters}).
+Typical parameters are the input file, or the tokenizer itself.
+If the tokenizer is defined in a class \verb+tokenizer+,
+one can define  
+\begin{verbatim}
+   %parameter { tokenizer } tok   // & will be added automatically. 
+   %source{ tok. read( ); }
+\end{verbatim}
+Note that \verb+tok+ is not a global name,
+but a reference field of the parser that 
+has to be initialized when the parser is constructed. 
+
+
+
+\section{Specifying the Grammar and Action Code}
+\label{Sect_gram_act}
+
+\noindent
+The main part of the description of a bottom up parser
+consists of the grammar rules, and what must be done when
+a rule is applied. In order to do this,
+one can attach code to grammar rules.
+The attached code is traditionally
+called \emph{action code} (See \cite{Yacc1975}),
+but \emph{reduction code} would be better fitting.
+Grammar rules have form \verb+A => B1 ... Bn+. 
+We call \verb+A+ the \emph{left hand side (lhs)}, and \verb+B1 ... Bn+
+the \emph{right hand side (rhs)} of the rule. 
+The action code must specify how the attribute of \verb|A|
+is computed from the attributes of \verb+B1 ... Bn+. 
+In addition to that, action code can modify parameters of the parser,
+or have other side effects. 
+If \verb+A+ has an attribute type distinct from \verb|void|,
+the action code must contain a return statement
+that returns the attribute of \verb|A|. 
+If \verb|A| has an attribute different from \verb|void| 
+and there is no action code, Maphoon will create an error
+without constructing a parser. 
+For example, the following example will result in an error: 
+\begin{verbatim}
+%symbol { int } A
+
+%rules
+   A => b ;  // Error, don't know which integer to use as attribute.
+\end{verbatim}
+This can be pretty annoying because one usually wants to 
+add the action code gradually. In order to make this easier,
+one can write
+\begin{verbatim}
+   %skip
+   ... here unfinished rules
+   %endskip \end{verbatim}
+around the rules that do not have action code yet. 
+
+If some of the \verb+Bi+ have attributes, they can
+be used in the computation. 
+The following is a simple example. It describes three grammar rules,
+which share a common lhs \verb+E+.
+\begin{verbatim}
+E  => E:e PLUS F:f   { return e + f; }
+    | E:e MINUS F:f  { return e - f; }
+    | F:f            { return f; }
+    ; \end{verbatim}
+If one wants to use the attribute of an rhs symbol, one
+has to attach a variable to it by using a colon (\verb+:+). 
+This is done for \verb+E:e+ and \verb+F:f+ in the example above. 
+Attached variables have the declared type 
+of the symbol to which they are attached. The return statements
+set the attribute value of the \verb+lhs+ symbol. 
+If the lhs symbol has no attribute, the action code can simply
+fall over the end.
+
+In the given example, all action code consists of a single return statement,
+but it may use any $ C^{++} $ statement, it may extend over 
+multiple lines, and it may contain more than one return statement.
+We recommend that one keeps action code moderate in size. 
+
+In addition to computing the lhs value, action code can have
+side effects. In particular, action code can use and modify 
+the values of parameters (See Section~\ref{Sect_parameters}).
+For example, an assignment statement can store 
+the assigned value: 
+\begin{verbatim}
+Command => IDENT:id BECOMES E:e SEMICOLON 
+{
+   if( errorlog. empty( ))
+   {
+      std::cout << "   --> assigning: " << id << " := " << e << "\n";
+      memory[id] = e;
+   }
+   else
+   {
+      printerrors( errorlog, std::cout );
+      errorlog. clear( );
+   }
+} \end{verbatim}
+The action code relies on the following declarations:
+\begin{verbatim}
+   %parameter{ std::map< std::string, double > } memory
+   %parameter{ std::vector< std::string > }      errorlog
+
+   %symbol{ std::string }            IDENT
+   %symbol{ double }                 E \end{verbatim}
+If there were errors during computation of the attribute of \verb+E+, they 
+are printed and the error log is cleared.
+Otherwise, the value of \verb+E+ is stored
+in the value \verb+IDENT+.
+
+In order to decide when parsing is complete, one 
+lhs symbol has to be assigned the role of \emph{start symbol}
+(although for bottom up parsing, calling it \emph{end symbol} would
+be better.)
+The parse is complete when the input is rewritten into 
+the start symbol. 
+
+Maphoon constructs a parser that can be called with different
+start symbols. In this way, different languages
+can share grammar rules and symbol sets.
+Possible start symbols have to be declared. 
+Together which each start symbol, one has to specify the 
+symbols that terminate correct input derived from the
+start symbol. We call these symbols
+the \emph{terminators} of the start symbol.
+Natural choices are the end-of-file symbol, or a semicolon.
+
+\noindent
+The following declares a start symbol S with terminators
+T1, \ldots, Tn:
+\begin{verbatim}
+   %startsymbol S T1 T2 ... Tn  
+\end{verbatim}
+The following defines a start symbol S with terminator
+EOF, and a start symbol EXP with terminator DOT.
+\begin{verbatim}
+   %startsymbol S EOF
+   %startsymbol EXP DOT
+\end{verbatim}
+If a start symbol is declared more than once, the terminator
+sets are merged. 
+
+When the parser is called, it has to be called with
+the start symbol that one wants to recognize. 
+It is guaranteed that the parser will never read beyond
+a terminator of the given start symbol. 
+When a symbol T is declared as a terminator symbol of a start
+symbol S, the symbol T must be not reachable from S. 
+Otherwise, the parser would not know when to stop.
+Maphoon checks that no terminator is reachable from its
+start symbol. 
+
+In many cases, parsing has to be stopped before the input is reduced 
+into a start symbol. This happens for example when there
+exists a designated quit command. This will be discussed
+in Section~\ref{Sect_timetosaygoodbye}.
+
+In addition to action code, rules can have conditions attached to them.
+The conditions are evaluated before the rule is reduced, and 
+if the condition reduces to zero or a negative number, the reduction is
+not carried out. This makes it possible to parse ambiguous grammars. 
+This will be discussed in detail in Section~\ref{Sect_runtime}.
+
+If one wants to be sure that the return value is moved 
+(instead of copied), one must take some precautions:
+Local varables and expressions returning a value, are always moved.
+This follows from the $ C^{++} $ standard. If one returns an
+attribute originating from the right hand side, it is not moved by default.
+In that case, one must use \verb|std::move|.
+Suppose that symbol \verb|A| has attribute type \verb|Atype|,
+and that the following rule: 
+\begin{verbatim}
+   A => A:a B:b  
+   {
+      Atype loc = ...
+ 
+      if( ... ) return A(b)  // Temporary, will be moved.
+      if( ... ) return loc   // Local variable, will be moved.
+      return std::move(a);   
+         // Originates from lhs, std::move is needed.
+   }; \end{verbatim} 
+
+\section{Interacting with the Symbol Class}
+
+Maphoon creates a symbol class in files
+{\bf symbol.cpp} and {\bf symbol.h}.
+The tokenizer has to create symbols. 
+This is done by calling one of the constructors.
+If an infotype is present, the constructors have form
+\begin{verbatim}
+symbol( symbolval, const std::optional< infotype > &, const A& );
+symbol( symbolval, const std::optional< infotype > &, A&& ); 
+
+symbol( symbolval, const std::optional< infotype > & );
+   // For symbols without attribute. \end{verbatim}
+If no infotype is present, the constructors have form
+\begin{verbatim}
+symbol( symbolval, const A& );
+symbol( symbolval, A&& ); 
+
+symbol( symbolval );
+   // For symbols without attribute. \end{verbatim}
+For primitive types, $ A $ will be a value parameter,
+instead of reference. 
+Type \verb+symbolval+ is an enumeration type that
+consists of the names of all declared symbols, preceeded
+by \verb+sym_+ . If one defines a symbol \verb+NEWLINE+,  
+\verb+symbolval+ will contain \verb+sym_NEWLINE+  .
+
+The constructors do not check that the attribute type 
+\verb+A+ corresponds to the declared attribute type of
+the symbol. 
+For example, one can declare \\
+\verb+%symbol{ std::string } IDENTIFIER+ 
+and construct \\ \verb+symbol( sym_IDENTIFIER, 3.14 )+.
+This will eventually cause the parser to throw 
+\verb+bad_variant_access+ when the field is accessed.
+If one assigns $ 1 $ to the field \verb+checkattrtypes+, the parser
+will complain 
+when the attribute type does not correspond
+to \verb+symbolval+. If one assigns
+\verb+checkattrtypes = 2+, the parser will complain and stop when
+the attribute type is wrong.
+
+If debugging is switched on (by assigning a value
+different from \verb+0+ to the \verb+debug+ field), 
+the parser will print the symbols on the parse stack, including the attributes.
+In order for an attribute to printable, define the function
+\verb+void print_attr( const A&, std::ostream& out )+ 
+for attribute type \verb+A+.
+Use \verb+symbolcode_cpp+ (see Section~\ref{Sect_remaining}). 
+\verb+void print_attr+ is already defined for most of the primitive types, 
+and also for \verb+std::pair+.
+The definition for \verb+double+ is:
+\begin{verbatim}
+void print_attr( double d, std::ostream& out )
+   { out << d; } \end{verbatim}
+The definition for \verb+std::pair+ is: 
+\begin{verbatim}
+template< typename T1, typename T2 > 
+void print_attr( const std::pair<T1,T2> & pr, std::ostream& out )
+{
+   out << '[';
+   print_attr( pr. first, out ); out << ',';
+   print_attr( pr. second, out ); out << ']';
+} \end{verbatim}
+
+\noindent
+Defining \verb+print_attr+ is easy in most cases. 
+If \verb+A+ is a container type, one can call \\
+\verb+void print_range( Iter i0, Iter i1, char c0, char c1, std::ostream& out );+
+from \verb+print_attr+. 
+The function will print the range \verb+i0..i1+
+between a \verb+c0+ and a \verb+c1+. 
+For example, in order to print a set of characters, include 
+\begin{verbatim}
+%symbolcode_cpp {
+   void print_attr( const std::set< char > & set, std::ostream& out )
+   {
+      print_range( set. begin( ), set. end( ), '{', '}', out );
+   }
+} \end{verbatim}
+For the rest, if anything is unclear, one can always look at
+the code in the files {\bf symbol.cpp} and {\bf symbol.h}.
+It is designed to be readable. 
+
+Note that in action code, one does not deal directly with
+the symbol class. One only needs to compute the
+attribute of the left hand side and return it. 
+
+\section{Runtime Conflict Resolution}
+\label{Sect_runtime}
+
+Conflicts arise when the grammar is ambiguous,
+or when parsing requires looking ahead further than one symbol.
+This can be caused in principle by mistakes in the grammar. 
+If this is the case, the grammar can be corrected,
+and the conflict will go away. 
+
+A common source of ambiguity are underspecified priorities
+between operators. In most cases, the grammar can
+be made unambiguous by introducing additional
+non-terminal symbols. Consider for example:  
+\begin{verbatim}
+Formula => CONST    
+        |  NOT Formula                
+        |  Formula AND Formula    
+        |  Formula OR Formula   
+        |  Formula IMP Formula
+        ;
+\end{verbatim}
+This grammar is ambiguous, because the 
+inputs \verb|CONST AND CONST AND CONST|
+and \verb|CONST AND CONST OR CONST| can
+be parsed in different ways, 
+dependent on whether the left or the 
+right operator receives priority.
+It can be made non-ambiguous
+by introducing additional non-terminal symbols: 
+\begin{verbatim}
+Formula  => Formula2 IMP Formula | Formula2 ;  // richt associative.
+Formula2 => Formula2 OR Formula3 | Formula3 ;  // left associative.
+Formula3 => Formula3 AND Formula4 | Formula4 ;
+Formula4 => NOT Formula4 | CONST ;
+\end{verbatim}
+
+\noindent
+This solution does not always work, because
+some programming languages 
+(Prolog~\cite{SterlingShapiro94} is probably the most important one) allow
+runtime definition of operators.
+In addition, some languages have so many levels of operator priorities,
+that it may be easier
+to use the runtime conflict resolution of Maphoon. 
+
+Another form of ambiguity are reduction rules that are only
+possible when the right hand side meets certain requirements.
+For example, instead of making the tokenizer recognize reserved words,
+one can use grammar rules to recognize them. 
+This has the advantage that reserved words can be used as ordinary identifier
+at positions where the grammar does not allow the reserved word. 
+For example, one can define:
+\begin{verbatim}
+While => IDENT:s; // With condition that s == "while" \end{verbatim}
+
+\noindent
+A similar situation occurs in $ C, $ where an identifier can be
+a type name if it is declared as type:
+\begin{verbatim}
+TypeName => IDENT:s; // Assuming that s was defined as type. \end{verbatim}
+In this case, one can also pass the type information to the tokenizer
+and have the tokenizer make the decision, but making the decision
+in the parser will ensure that no \verb+TypeName+s are created
+at places where a type name cannot occur. 
+
+\noindent
+Perhaps the most famous ambiguity is the dangling else problem:
+\begin{verbatim}
+Statement => IF Expr THEN Statement
+           | IF Expr THEN Statement ELSE Statement  
+           ;   \end{verbatim}
+In the input \verb+IF Expr THEN IF Expr THEN Statement ELSE Statement+,
+the \verb+ELSE Statement+ can be connected either to the 
+first or to the second \verb+IF+.
+Usually the \verb+ELSE+ is connected to the
+nearest \verb+IF+. This can be enforced by requiring that
+lookahead is not \verb+ELSE+ in the first rule.
+
+In order to attach a precondition to a grammar rule, use 
+\verb+%requires+, followed by code that checks the precondition.
+This code has the same form as action code, but attribute variables
+and parameters are only {\bf const} accessible. Otherwise
+the precondition code could make changes to the state of the parser
+and after that, decline the reduction. 
+
+The code of the precondition must return a \verb+short int+.
+A return value greater than zero means that the reduction
+will take place. Returning zero means that the reduction will not
+take place, but shifting is still allowed.  
+Returning a value less than zero means that the reduction will not
+take place, and in addition, no shift will be allowed. If there
+are more reduction candidates, they will be still considered. 
+In most cases, there is no need to block shifts, and returning
+a \verb+bool+ is sufficient.
+
+The rules below reduce an identifier into the \verb+Quit+ symbol
+when it equals \verb+"quit"+ and
+into the \verb+Show+ symbol when it equals \verb+"show"+. 
+\begin{verbatim}
+   Quit => IDENT : id
+   %requires { return id == "quit"; }
+      // booleans are handled as expected. 
+   ; 
+
+   Show => IDENT : id
+   %requires { return id == "show"; }
+   ; \end{verbatim}
+The rules have no action code, because symbols \verb+Quit+ and
+\verb+Show+ have no attribute.
+In nearly all cases, the precondition can simply return a 
+\verb+bool+ that will be correctly converted into $ 0 $ or $ 1. $ 
+Returning a negative number is needed only for nonassociative
+operators.
+
+In case of a conflict, maphoon will try all reductions,
+and pick the first one that accepts. 
+In order for this approach to have predictable behaviour, 
+the programmer must
+have control over the order in which reductions are attempted.
+The \verb+%reductionseq+ statement provides this control. 
+If there is a state in which more than one
+reduction is possible, the lhs symbols of the reducible rules
+must be listed together in a \verb+%reductionseq+ statement in order 
+of preference.
+If they do not occur together
+in a \verb+%reductionseq+ statement, Maphoon will print a warning,
+and create a parser that applies the rules in an unpredictable order. 
+The parser will reduce the first rule whose precondition returns
+a value greater than zero (or has no precondition). 
+If all rules return zero and the state allows a shift, 
+the parser will perform the shift. 
+In the remaining case (when there is no shift, or
+one of the preconditions returned a value less than zero), 
+the parser creates a syntax error.
+
+Precondition code can use the lookahead to decide if the reduction
+should be made. 
+This is important when deciding between
+priorities of operators. 
+It is guaranteed that there is a lookahead
+when \verb+%requires+ is evaluated. 
+The lookahead can be accessed by calling 
+\verb+getlookahead( )+ and has type \verb+const symbol&+. 
+
+The following code decides if the rule 
+\verb+Formula => Formula AND Formula+ should be reduced:
+
+\begin{verbatim}
+Formula => Formula:f1 AND Formula:f2
+%requires
+   { return decide( sym_AND, getlookahead( ). val ); }
+%reduces
+   { return form( op_and, f1, f2 ); } 
+; \end{verbatim}
+Function \verb+decide+ can return $1$ if \verb+sym_AND+ if has
+higher priority than \\ \verb+getlookahead( ). val+,
+and $0$ if the lookahead
+is an operator with higher priority. If the lookahead has the same priority
+and \verb+sym_AND+ is non-associative, it should return $ -1. $ 
+In that case, the parser will generate an error. 
+Its implementation could be as follows:
+\begin{verbatim}
+   short int decide( symbolval s1, symbolval s2 )
+   {
+      // std::cout << "Deciding between: " << s1 << " " << s2 << "\n";
+
+      if( s1 == sym_NOT || s1 == sym_AND ) 
+         return 1;  // Reduce, both have highest priority.
+
+      if( s1 == sym_OR  )
+      {
+         if( s2 == sym_AND )
+            return 0;  // AND has higher priority, so we shift.
+         return 1;  
+      }
+
+      if( s1 == sym_IMP )
+      {
+         if( s2 == sym_AND || s2 == sym_OR || s2 == sym_IMP )
+            return 0; // AND/OR have higher priority, and IMP 
+                      // is rightassociative, so we shift.
+         return 1;
+      }
+      ...  
+   } \end{verbatim}
+It is guaranteed that \verb+getlookahead( )+
+can be called when precondition code is called in case there is more
+than one option.  
+The parser makes reductions without lookahead only in states 
+where this reduction is the only option. 
+It is in principle possible to add preconditions to such reductions,
+but it is a bad design, because the error should have been caught earlier.
+
+The only purpose of \verb+%reduces+ is to make the input look better.
+It can be omitted, but it looks not nice: 
+\begin{verbatim}
+   Formula => Formula:f1 AND Formula:f2
+   %requires
+      { return decide( sym_AND, getlookahead( ). val ); }
+   { return form( op_and, f1, f2 ); }
+   ; \end{verbatim}
+
+\noindent
+The purpose of allowing preconditions to return
+negative values is to be able to deal with non-associative operators. 
+If one would use only yes/no, it would be impossible to 
+define non-associative operators.
+
+\section{Stopping the Parser}
+\label{Sect_timetosaygoodbye}
+
+The parser can be stopped by assigning
+\verb+timetosaygoodbye = true+ in action code. 
+The parser will stop immediately after the reduction,
+and return the resulting lhs.
+
+\section{Syntax Errors: Reporting and Recovery}
+ 
+\noindent
+Maphoon uses an optional, experimental approach
+to error reporting, which we will explain shortly.
+Alternatively, the user can write an own error reporting function.
+
+When the parser gets stuck, it calls method 
+\verb|void syntaxerror( )|. 
+The Maphoon implementation of this method  
+uses a table of sequences of symbols that trigger expectations.
+The expectations are used to create informative error messages. 
+Alternatively, the user can provide an 
+own implementation of \verb|syntaxerror( )|.
+In that case, \verb|%usererror| must be included in the grammar
+file, so that the standard implementation will not be generated.
+The actual implementation can be defined using \verb|parsercode_cpp|.
+
+If the user decides to create an own implementation, then 
+\verb+syntaxerror( )+ must first decide if the error
+is new, or the result of a failed recovery attempt.
+This can be done by looking at \verb|timesincelasterror|
+and comparing it to \verb|maxtrialperiod|. 
+The Yacc manual \cite{Yacc_system} suggests that $ 3 $ is a good 
+cut-off value, so this is the default value of \verb|maxtrialperiod|.
+It can be reassigned. 
+
+The implementation provided by Maphoon 
+tries to create an informative error message.
+The default message has form
+'unexpected X', where $X$ is the current lookahead symbol. 
+If there is no lookahead, the message will be just
+'syntax error'. 
+If there is an \verb+infotype+, the default \verb+syntaxerror( )+ will
+try to include source information in the message. 
+
+The error message can be made more informative by 
+adding what was expected instead of the lookahead.
+In order to define an expectation, 
+one must specify a sequence of symbols that possibly
+occur on the parse stack, together with the expectation 
+that one gets from seeing them. 
+It is possible to add integers between the symbols 
+that specify how far the triggering symbols can be apart. 
+Adding $ n $ 
+means that the symbols can be at most $ n $ positions apart.
+No integer means that there can no other symbol between
+the triggering symbols.
+Instead of distance \verb+1+, a star
+(\verb+*+) can be used. One can also use multiple stars
+to obtain bigger integers. 
+A simple example is
+\begin{verbatim}
+%errors
+   LPAR 5 => "closing parenthesis"; \end{verbatim}
+This rule can be alternatively written as
+\begin{verbatim}
+%errors
+   LPAR * * * * * => "closing parenthesis"; \end{verbatim}
+If the parser gets stuck, and there is an \verb+LPAR+ 
+on the parse stack at a position not deeper than $ 5 $ symbols,
+the error method will report that it expected
+a closing parenthesis instead of the lookahead.
+Here is another example, containing different possible
+expectations: 
+\begin{verbatim}
+%errors
+   LPAR 10 => "a )";
+   IDENTIFIER LPAR 5 => "a function argument";
+   ( TIMES | DIVIDES | MODULO ) => "a factor";
+   ( PLUS | MINUS ) => "a summand"; \end{verbatim}
+If the parser gets stuck with \verb+PLUS+ or \verb+MINUS+ on
+the top of the stack, the error function will report that it
+expected a summand (instead of the lookahead).
+Similarly, if the parser gets stuck after seeing \verb+IDENTIFIER LPAR+ 
+and not more than $ 5 $ other symbols, it will report that it
+expected a function argument.
+If more than one rule can be applied the rule that matches
+highest on the parse stack will be used to define the expectation. 
+The easiest way to find suitable expectations is by
+setting \verb+debug = 1+, creating the error, and looking
+at the parse stack for characteristic symbols.
+
+If the default error method is not good enough, and the user wishes 
+to define an own error function, 
+it is possible to include \verb+%usererror+ in the input file, 
+and write an own 
+\verb+void syntaxerror( )+ method. 
+Inside \verb+syntaxerror( )+, one can access
+all parameters and to the lookahead. 
+In order to get the lookahead, call \verb+const symbol& getlookahead( )+. 
+
+Since the parser uses default reductions, it may lose
+information when it encounters an error. This can be prevented by 
+setting \verb+%nodefaults+. It will result in more informative 
+error messages. Unfortunately, it may create problems
+with interactive applications, see Section~\ref{Sect_interactive}. 
+
+Recovery works the same as in Yacc (See \cite{Yacc_system}). 
+The parser
+inspects the stack for \verb+_recover_+ transitions
+and collects the symbols that occur after these transitions. 
+After that, it throws away input symbols until it encounters
+one of the collected symbols. 
+It pushes \verb+_recover+ and
+the symbol after it, and assumes that it is recovered. 
+
+\noindent
+An example of the use of \verb+_recover+ in a rule is as follows: 
+\begin{verbatim}
+ % E   => _recover_ SEMICOLON
+\end{verbatim}
+This means that if somewhere, while attempting to parse an $ E, $ 
+something goes wrong, the 
+parser will resynchronize when it sees a \verb+SEMICOLON+.
+If token $ E $ has an attribute, the recovery rule needs to 
+invent a reasonable value for the attribute.
+If the parser cannot recover within the limit 
+specified by \verb|maxrecovery|, 
+or a terminator is encountered while trying to recover, 
+the parser will return \verb+sym__recover_+. 
+
+If after seeing the \verb+SEMICOLON+ one decides that recovery was not
+a good idea after all, one can assign 
+\verb+timetosaygoodbye = true;+ but one must be sure to
+report the error or to log it.
+
+\section{Movability of Symbols}
+
+The parser will be more efficient when the symbol class is nothrow-movable,
+because it will be used when the parse stack is reallocated. 
+In order to obtain that, every attribute must be nothrow-movable,
+and the \verb+infotype+ must be nothrow copyable, if it is present. 
+If one sets the field \verb+checkmovable+ to $ 1, $ the parser
+will create a warning when \verb+symbol+ is not movable.
+If \verb+checkmovable+ is set to $ 2, $ it will quit
+when \verb+symbol+ is not movable. 
+It is sufficient to make this check once when the set
+of possible attributes changes. 
+Also see the remarks at the end of Section~\ref{Sect_gram_act}
+about ensuring that attributes are moved. 
+Maphoon can be used with non-copyable attributes.
+
+\section{Dealing with $ C^{++} $ Errors}
+
+User code is preceeded by a \verb+#line+ directive,
+so that errors will be reported with their correct place in
+the \verb+.m+ file. This is convenient if the error
+indeed originates from user code in the \verb+.m+ file.
+Otherwise, it is annoying. If you suspect that
+the error does not originate from user code, 
+delete the \verb+#line+ directives from the parser
+and the symbol files. 
+
+\begin{itemize}
+\item
+   If the compiler complains about duplicate constructors in
+   the \verb+symbol+ class, the most likely cause is that
+   symbols were declared with equivalent types, whose
+   equivalence was not detected by Maphoon. 
+   This may be caused by a \verb+using+ directive,
+   or by use of \verb+const+ in the attribute type of a symbol declaration.
+\item
+   If the compiler complains that it cannot find some constructor
+   of the \verb+symbol+ class, the most likely cause is that 
+   no symbol was declared with the required attribute type. 
+\item
+   If the compiler cannot resolve one of the attribute types
+   while compiling {\bf parser.cpp}, it will
+   produce monumental error messages.
+   Check that all files where the attribute types are defined, are
+   included. 
+   Use \verb+symbolcode_h+. 
+   
+\item
+   If the compiler says \verb+error: forming reference to void+,
+   this is likely caused by the fact that one did not declare the 
+   type of an attribute that one is trying to use in action code.
+
+\end{itemize}
+
+
+\section{Interface to the Parser}
+\label{Sect_interface}
+
+\noindent
+If everything goes well, Maphoon creates a parser in 
+files {\bf parser.h} and {\bf parser.cpp}. 
+The parser is defined in a class \verb+parser+ in the 
+namespace specified by \verb+%parserspace+.
+The constructor has form: 
+\begin{verbatim}
+   parser( P1& p1, P2& p2, ..., Pn& pn ) :
+      p1(p1), p2(p2), ..., pn(pn) 
+   { } \end{verbatim} 
+where \verb+p1, ..., pn+ are the parameters
+declared by \verb%parameter% .
+The parameters are reference fields of the parser class:
+\begin{verbatim}
+P1& p1;
+P2& p2;
+...
+Pn& pn; \end{verbatim}
+Action and preconditions code become methods of the parser
+class, so that the 
+parameters are accessible. 
+The lookahead can be accessed by
+calling \verb+getlookahead( )+. 
+Presence of a lookahead can be checked
+by calling \verb+haslookahead( ) const+. 
+
+The parser is started by calling method
+\verb+symbol parse( symbolval start )+.
+The \verb+symbolval+ is the start symbol that one wants to recognize.
+Only symbols that were declared as \verb+%startsymbol+ in the input
+can be used as start symbol. Otherwise, the parser 
+throws \verb+std::out_of_range+. 
+
+The symbol returned depends on the way the parser
+terminated. The possibilities are as follows: 
+\begin{enumerate}
+\item
+   The parse was succesful and the input reduced into the start symbol. 
+   The start symbol is returned, containing a possible attribute. 
+   If a \verb+lookahead+ is present, it will be a terminator
+   of the original start symbol. 
+\item
+   The parse was succesful, and ended by assigning
+   \verb+timetosaygoodbye=true;+.
+   In that case, the returned symbol is the lhs of the 
+   action code in which the assignment took place.  
+\item
+   The parser could not recover from a syntax error and reached
+   a terminator symbol while trying to recover. In that
+   case the parser returns \verb+sym__recover_+. 
+\item
+   The parser could not recover from a syntax error and gave up.
+   In that case, it also returns \verb+sym__recover_+. 
+\end{enumerate}
+
+\noindent
+Note that, if a syntax error occurred from which the parser 
+recovered, it will return in state (1) or (2). It is the responsibility
+of the user keep track of errors that were recovered. 
+
+If the parser behaves in an unexpected way, it can be
+debugged by assigning $ 1,2 $ or $ 3 $ to the \verb+short int debug+ field. 
+A higher number results in more output. 
+
+\section{Interactive Applications}
+\label{Sect_interactive}
+
+Interactive applications are applications where the
+program repeatedly asks for input, and immediately processes the 
+given input.
+Parsers constructed by Maphoon can be used
+for interactive applications,
+but there are a few problems that one has to take into account: 
+One has to take care of the moment at which commands are reduced, 
+one has to make sure that the parser can be ended by means of a
+quit command (in addition to encountering EOF), and one 
+has to choose whether the parser is called once for the complete 
+session, or separately for each command. 
+
+In an interactive implementation, it has to be ensured that the 
+user receives feed back immediately after typing a command. 
+The moment when reductions are made depends on whether 
+\verb+%nodefaults+ is set. 
+If the grammar contains a rule of form 
+\verb+Command => Expr:e SEMICOLON { Process e }+ 
+and \verb+%nodefaults+ is set, the parser will reduce the rule
+only when the symbol after the \verb+SEMICOLON+ has been read, which 
+implies  that the user has to start typing the next command before 
+\verb+Expr+ is processed. 
+Without \verb+%nodefaults+, the parser will reduce immediately after
+reading the \verb+SEMICOLON+ (assuming it is the only reduction
+possible, and nothing can be shifted).
+If one wishes to use \verb+%nodefaults+, the rule can be rewritten as
+follows: 
+\begin{verbatim}
+   Command => E SEMICOLON ;
+   E => Expr:e { Process e }; \end{verbatim}
+
+\noindent
+In our experience, there is no need to use
+\verb|%nodefaults|.
+Multiple commands can be processed either completely inside the parser,
+or by designing a parser that processess a single command and returns. 
+The former option is easier to implement: 
+\begin{verbatim}
+   %startsymbol Session EOF
+   %rules 
+
+   Session => Session Expr:e SEMICOLON 
+       { process e. 
+         If e is a quit command, set timetosaygoodbye = true } 
+       | _recover_ SEMICOLON
+       ; \end{verbatim} 
+The parser will stop when it reached EOF, or when a quit command is 
+encountered. 
+
+If one wants to call the parser separately for each command, 
+one has to be careful with terminators, and implement resynchronization
+after a syntax error by hand.
+We show from an example how it should be done,
+because an example is easier to read than explanations. 
+\begin{verbatim}
+   parser prs = parser( ... );
+  
+   while( forever ) 
+   {
+      prs. ensurelookahead( ); 
+      if( prs. getlookahead( ). val == sym_EOF )
+         (end-of-file reached in normal fashion.)
+
+      symbol res = prs. parse( sym_Expr );
+         // parser will start with existing lookahead.
+
+      if( res. val == sym_Expr && 
+          prs. getlookahead( ). val == sym_SEMICOLON )
+      {
+         // Everything went well. 
+
+         if( res. attr is a quit command ) 
+            exit normally. 
+
+         (process res. attr.) 
+      }
+      else
+      {
+         // It was a syntax error: 
+        
+         while( prs. getlookahead( ). val != sym_SEMICOLON &&
+                prs. getlookahead( ). val != sym_EOF )
+         {
+            prs. resetlookahead( );
+            prs. ensurelookahead( );
+         }
+      }
+
+      if( prs. getlookahead( ). val == sym_SEMICOLON )
+         prs. resetlookahead( );
+            // If lookahead is EOF, we keep it.
+
+      prs. reset( );  
+         // This does not reset the lookahead, so if we
+         // encountered EOF, we will quit in the next iteration. 
+   } 
+\end{verbatim}
+
+\section{Possible Problems}
+
+Here are some features that we don't have, but which
+are worth considering:
+\begin{itemize}
+\item
+Some parser generators allow the use of of regular expression in grammar rules.
+For example 
+\begin{verbatim}
+Formula => Formula::f1 ( (PLUS | MINUS ) Formula :f2 ) * ; 
+
+Statement => IF Expr THEN Statement ( ELSE Statement ) ? ; \end{verbatim}
+In fact, it is totally easy to allow DFAs on right hand sides in rules,
+because items can be viewed as the state of a linear DFA. 
+The problem is that we do not know how to compute attributes
+in case of DFAs. 
+
+\item
+   Automatic construction of AST. It's not worth it. 
+
+\item
+   It has been reported that parsers generated by Maphoon compile
+   unreasonably slow when the parse tables are big, but I have
+   not seen a concrete example. In order to fix
+   this, I need an example where the problem shows up. 
+   If you have one, please contact me.
+\item
+   At present, it doesn't seem possible to use \verb|constexpr| to
+   implement a practical parser generator, but it might change in the 
+   future.
+     
+\end{itemize}
+
+
+\section{Remaining Options}
+\label{Sect_remaining}
+
+\begin{itemize}
+\item
+   If \verb+%selfcheck+ is selected, the parse tables
+   will be rechecked for completeness. 
+   Maphoon will also print information about the quality
+   of the hash tables used. 
+   This option is important for the developer only. 
+
+\item
+   By adding option \verb+%showclosures+, the itemsets are shown closed
+   instead of simplified. 
+   This may be useful for teaching or 
+   finding the cause of conflicts. 
+   It does not affect the parser constructed. 
+\item
+   It is possible to specify $ C^{++} $ code that will 
+   be copied into the symbol or parser definition.
+   No substitutions will be applied. 
+\begin{verbatim}
+%symbolcode_h{    }  // Goes into symbol.h without namespace.
+                     // Intended for including attribute types.
+%symbolcode_cpp{  }  // Goes into anonymous namespace in 
+                     // symbol.cpp. Intended for defining print_attr
+%parsercode_h{    }  // Goes into parser.h without namespace.
+%parsercode_cpp{  }  // Goes into parser.cpp in the
+                     // same namespace. \end{verbatim}
+   We recommend that the {\bf .h} files are used for 
+   \verb+#include+s only. 
+   
+   One should not define anything in \verb+%parsercode_cpp+,
+   unless one declares it in \verb+%parsercode_h+, or
+   puts it in anonymous namespace.
+   As a general rule, one should not define 
+   anything important in {\bf parser.h} or {\bf symbol.h}, but use
+   a separate file and include it.   
+   It is not possible to declare anything that is 
+   accessible from outside using \verb+%symbolcode_cpp+,
+   because it is put in anonymous namespace.
+
+\item
+   If \verb+%nodefaults+ is set, the parser will never reduce
+   without lookahead even in states where reduction is the only
+   possibility. 
+   Suppose that one has a rule \verb+S => E SEMICOLON+.
+   When the semicolon has been pushed, the parser is in a state 
+   where the only possibility is reducing
+   the rule. In the default mode, the parser will reduce
+   without lookahead. If \verb+%nodefaults+ is set, the parser 
+   will still take a lookahead, and create
+   an error when the lookahead is not in the follow set
+   of \verb+S+. 
+   The advantage is that in case of error, the chances for recovery
+   are better.
+   The disadvantages are a bigger parse table, and 
+   a radically changed interactive behaviour
+   of the parser: If in the action code, the system
+   has to react to the input, this reaction will come only after
+   the user typed the first symbol after the semicolon. 
+\item
+   \verb+%symbolspace s1 :: ... :: sn+ determines the namespace
+   of the symbol class.
+\item
+   \verb+%parserspace s1 :: ... :: sn+ determines the namespace
+   of the parser class
+\end{itemize}
+
+
+\section{Acknowledgements}
+
+I thank Danel Batyrbek, Aleksandra Kireeva,
+Tatyana Korotkova, Dina Muktubayeva, Cl\'{a}udia Nalon and
+Olzhas Zhangeldinov. 
+Special thanks to Zoltan Teki for extensively trying out Maphoon
+in January 2023. Zoltan found a bug in the tokenizer generator, and
+insisted on adding support for move-only attributes.
+
+\noindent
+We thank Nazarbayev University for
+supporting this research through the Faculty Development Competitive
+Research Grant Program (FDCRGP), grant number 021220FD1651.
+
+\bibliographystyle{plain}
+\bibliography{maphoon}
+
+\end{document}
+ 

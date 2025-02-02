@@ -12,24 +12,25 @@
 #include <concepts>
 #include <stdexcept>
 
-#line 25 "parsing/grammar.m"
+#line 26 "parsing/grammar.m"
  #include "location.h" 
 
 namespace parsing { 
 
    enum symbolval
    {
-      sym_FRM, sym_DEF, sym_IDENTIFIER, sym_OR, 
-      sym_EXISTS, sym_FORALL, sym_COLON, sym_ASSIGN, 
-      sym_COMMA, sym_func, sym_SCANERROR, sym_struct_specifier, 
-      sym_type, sym_EQ, sym_AND, sym_DOT, 
-      sym_GT_EQ, sym_struct_declaration, sym_RBRACKET, sym_def_specifier, 
-      sym_LPAR, sym_struct_declaration_list, sym_EOF, sym_IMPLY, 
-      sym_term, sym_Statement, sym_arg_list, sym_COMMENT, 
-      sym_Session, sym_STRUCT, sym_FILEBAD, sym_SEMICOLON, 
-      sym_GT, sym_EMPTY, sym_Expr, sym_RPAR, 
-      sym_WHITESPACE, sym_LBRACE, sym_RBRACE, sym__recover_, 
-      sym_LBRACKET, sym_type_list, sym_LT, sym_LT_EQ
+      sym__recover_, sym_FRM, sym_DEF, sym_STRUCT, 
+      sym_IDENTIFIER, sym_OR, sym_EXISTS, sym_FORALL, 
+      sym_COLON, sym_ASSIGN, sym_COMMA, sym_func, 
+      sym_SCANERROR, sym_struct_specifier, sym_type, sym_EQ, 
+      sym_AND, sym_DOT, sym_GT_EQ, sym_struct_declaration, 
+      sym_RBRACKET, sym_def_specifier, sym_LPAR, sym_struct_declaration_list, 
+      sym_EOF, sym_IMPLY, sym_term, sym_Statement, 
+      sym_arg_list, sym_COMMENT, sym_Session, sym_identifier_list, 
+      sym_FILEBAD, sym_SEMICOLON, sym_GT, sym_EMPTY, 
+      sym_Expr, sym_RPAR, sym_WHITESPACE, sym_LBRACE, 
+      sym_RBRACE, sym_LBRACKET, sym_type_list, sym_LT, 
+      sym_LT_EQ
    };
 
    const char* getcstring( symbolval );

@@ -82,10 +82,14 @@ const char* parsing::getcstring( symbolval val )
 {
    switch( val )
    {
+   case sym__recover_ :
+      return "_recover_";
    case sym_FRM :
       return "FRM";
    case sym_DEF :
       return "DEF";
+   case sym_STRUCT :
+      return "STRUCT";
    case sym_IDENTIFIER :
       return "IDENTIFIER";
    case sym_OR :
@@ -140,8 +144,8 @@ const char* parsing::getcstring( symbolval val )
       return "COMMENT";
    case sym_Session :
       return "Session";
-   case sym_STRUCT :
-      return "STRUCT";
+   case sym_identifier_list :
+      return "identifier_list";
    case sym_FILEBAD :
       return "FILEBAD";
    case sym_SEMICOLON :
@@ -160,8 +164,6 @@ const char* parsing::getcstring( symbolval val )
       return "LBRACE";
    case sym_RBRACE :
       return "RBRACE";
-   case sym__recover_ :
-      return "_recover_";
    case sym_LBRACKET :
       return "LBRACKET";
    case sym_type_list :
@@ -201,8 +203,10 @@ bool parsing::symbol::has_correct_attribute( ) const
    {
    case sym_SCANERROR :
       return std::holds_alternative< std::string > ( attr );
+   case sym__recover_ :
    case sym_FRM :
    case sym_DEF :
+   case sym_STRUCT :
    case sym_IDENTIFIER :
    case sym_OR :
    case sym_EXISTS :
@@ -229,7 +233,7 @@ bool parsing::symbol::has_correct_attribute( ) const
    case sym_arg_list :
    case sym_COMMENT :
    case sym_Session :
-   case sym_STRUCT :
+   case sym_identifier_list :
    case sym_FILEBAD :
    case sym_SEMICOLON :
    case sym_GT :
@@ -239,7 +243,6 @@ bool parsing::symbol::has_correct_attribute( ) const
    case sym_WHITESPACE :
    case sym_LBRACE :
    case sym_RBRACE :
-   case sym__recover_ :
    case sym_LBRACKET :
    case sym_type_list :
    case sym_LT :

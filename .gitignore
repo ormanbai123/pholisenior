@@ -10,4 +10,7 @@ logic/term.cpp
 logic/belief.h
 logic/belief.cpp
 Makefile
+parsing/parser.*
+parsing/location.h
+parsing/symbol.*
 

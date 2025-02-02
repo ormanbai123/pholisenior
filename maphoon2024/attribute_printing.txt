@@ -1,0 +1,61 @@
+
+Maphoon currently requires that all possible attribute types
+are printable. 
+
+This is important for debugging only, so that
+all symbols can be printed.  
+
+It is sometimes useful, but it gives a lot of problems:
+
+(1) not everyone needs debugging, even if you need it,
+    it is usually not for all symbol types. 
+(2) Still you have to create all print functions,
+    and the error messages when print functions are missing, 
+    are very nasty.
+
+I want to solve this as follows: 
+
+Replace << by   print_attr( A& a, std::ostream& out ) 
+in symbol.cpp, where A is the attribute type 
+
+and provide template default definitions, with the 
+final default being:
+
+template< typename T >
+void print_attr( const T& t, std::ostream& out )
+{
+   out << "(no print for attribute)";
+}
+
+This has the advantage that:
+
+- The code compiles when no print functions are defined, because
+  of the default.
+
+- When the user makes a mistake, the error messages are much 
+  nicer
+
+- I can create specialized defaults for the STL containers, 
+  (std::vector, std::list) so that user doesn't have to write them.
+
+For example:
+
+template< typename T, typename U, typename C >
+void print_attr( const std::multimap< T, U, C > & mp, std::ostream& out )
+{
+   out << "{ ";
+   for( auto p = mp. begin( ); p != mp. end( ); ++ p )
+   {
+      if( p != mp. begin( ))
+         out << ", ";
+      print_attr( *p, out );
+   }
+   out << " }";
+}
+
+I created a version symbol.cpp and symbol.h (from the turing machines)
+that uses this (Created by hand). What do you think? 
+
+I am planning to adopt Maphoon, so that it generates this automatically.
+
+

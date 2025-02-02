@@ -1,0 +1,4 @@
+valgrind ./maphoon calculator/ambiguous.m calculator .
+
+
+

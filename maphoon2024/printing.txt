@@ -1,0 +1,70 @@
+
+Hello,
+
+I am getting tired of the printing in maphoon.
+class symbol has a print function, which is cool, but it 
+requires that every attribute type is printable. If an
+attribute type 
+is not printable, it results in kilometerlong error messages. 
+
+Most of these messages come from attribute types like
+std::vector, std::list, std::map which have no default
+printing functions. 
+
+Maybe to do the following:
+
+Inside symbol define a function maph_print in a local namespace.
+This function has print functions for all primitive types,
+and for std::vector, std::map, etc.
+
+Now most attribute types are printable, except user defined classes.
+
+For those, we still require that the user defines them, for example: 
+void printattr( const X& x, std::cout& out )
+   { out << x; // Or an explicit print. }
+
+Main advantages are that most attributes will be printed automatically,
+and for those that are not, the error messages will be much shorter. 
+What do you think?
+
+Maybe something can be done with inheritance?
+
+class printable
+{
+   virtual void print( std::ostream& out ) const = 0;
+}
+
+template< typename > 
+struct print : public print
+{
+   void print( std::ostream& out ) const override
+   {   out << "printing the unprintable" }
+   }
+}
+   
+.. and then creates a few specializations for classes that are printable.
+
+
+what do you think?
+
+#include <iostream>
+
+// Took this from https://nafe.es/posts/2020-02-29-is-printable/
+
+
+template<typename T, typename dummy = void>
+struct isprintable : std::false_type {};
+
+template<typename T>
+struct isprintable<T, 
+        typename std::enable_if_t<
+            std::is_same_v<decltype(std::cout << std::declval<T>()), std::ostream&>
+        >
+    > : std::true_type {};
+
+int main( int argc, char* argv[] )
+{
+   std::cout << isprintable<double> ::value << "\n";
+
+}
+

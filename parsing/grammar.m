@@ -18,6 +18,7 @@
 %symbol{} AND OR IMPLY
 
 %symbol{} IDENTIFIER
+%symbol{} identifier_list
 %symbol{} STRUCT DEF FRM
 
 //%symbol{} E F G Q PLUS MUL MINUS NUM
@@ -48,14 +49,9 @@ Statement => struct_specifier
            ;
 
 
-def_specifier => DEF IDENTIFIER LPAR arg_list RPAR ASSIGN term {std::cout << "Definition!\n";}
-               ;
-
-arg_list => 
-          | struct_declaration_list
-          ;
-
 term => IDENTIFIER;
+
+//-----------------------structs---------------------------------
 
 struct_specifier => STRUCT IDENTIFIER ASSIGN struct_declaration_list {std::cout << "STRUCT!\n";}
                   ; 
@@ -63,8 +59,11 @@ struct_specifier => STRUCT IDENTIFIER ASSIGN struct_declaration_list {std::cout 
 struct_declaration_list => struct_declaration
                          | struct_declaration COMMA struct_declaration_list 
                          ;
+identifier_list => IDENTIFIER
+				 | IDENTIFIER COMMA identifier_list
+				 ;
 
-struct_declaration => IDENTIFIER COLON type 
+struct_declaration => identifier_list COLON type
                     ; 
 
 type => IDENTIFIER
@@ -76,6 +75,15 @@ func => type LPAR type_list RPAR
 
 type_list => type   
           | type_list COMMA type
+          ;
+
+//-----------------------defs---------------------------------
+
+def_specifier => DEF IDENTIFIER LPAR arg_list RPAR ASSIGN term {std::cout << "Definition!\n";}
+               ;
+
+arg_list => 
+          | struct_declaration_list
           ;
 
 

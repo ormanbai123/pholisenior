@@ -1,0 +1,24 @@
+\begin{thebibliography}{1}
+
+\bibitem{Dragon2007}
+Alfred~V. Aho, Monica~S. Lam, Ravi Sethi, and Jeffrey~D. Ullman.
+\newblock {\em Compilers (Principles, Techniques and Tools)}.
+\newblock Pearson, Addison Wesley, 2007.
+
+\bibitem{Yacc_system}
+Akim Demaille and Paul Eggert.
+\newblock {Yacc} system.
+\newblock {\tt https://www.gnu.org/software/bison/}, 2014.
+
+\bibitem{Yacc1975}
+Stephen~C. Johnson.
+\newblock {Yacc}: Yet another compiler-compiler.
+\newblock Computing Science Technical Report~32, Bell Laboratories, Murray
+  Hill, NJ, 1975.
+
+\bibitem{SterlingShapiro94}
+Leon Sterling and Ehud Shapiro.
+\newblock {\em The Art of Prolog (Advanced Programming Techniques)}.
+\newblock The MIT Press, 1994.
+
+\end{thebibliography}

@@ -1,0 +1,19 @@
+#
+struct S := zero : O(O);
+
+struct Seq := 
+   zero : O, 
+   succ : O(O);
+
+struct Seq := 
+   zero : O(T,O(T)), 
+   succ : T;
+
+
+struct Seq := 
+   zero : O(T,O(T))(O, O), 
+   succ : T;
+
+struct Seq := 
+   zero, one, two, three, four : O(T,O(T))(O, O), 
+   succ : T;
