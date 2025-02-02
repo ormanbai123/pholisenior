@@ -1,7 +1,10 @@
 %startsymbol Session EOF
 
 %symbol Session
-%symbol{} Expr
+%symbol{} Statement Expr
+%symbol{} term def_specifier arg_list
+%symbol{} struct_specifier struct_declaration_list struct_declaration
+%symbol{} type type_list func
 
 %symbol{ std::string } SCANERROR
 
@@ -9,8 +12,6 @@
 %symbol{} LPAR RPAR LBRACE RBRACE LBRACKET RBRACKET 
 %symbol{} EQ LT GT LT_EQ GT_EQ ASSIGN  
 %symbol{} COLON SEMICOLON COMMA DOT 
-
-%symbol{} OBJ TRUTHVAL
 
 %symbol{} FORALL EXISTS
 
@@ -20,8 +21,6 @@
 %symbol{} STRUCT DEF FRM
 
 //%symbol{} E F G Q PLUS MUL MINUS NUM
-
-%symbol{} struct_specifier struct_declaration_list struct_declaration type type_list func
 
 %symbolcode_h { #include "location.h" }
 
@@ -40,12 +39,23 @@
 
 %rules 
 Session => 
-    | Session Expr SEMICOLON
+    | Session Statement SEMICOLON
     | Session _recover_ SEMICOLON
     ;
 
-Expr => struct_specifier
-     ;
+Statement => struct_specifier
+           | def_specifier
+           ;
+
+
+def_specifier => DEF IDENTIFIER LPAR arg_list RPAR ASSIGN term {std::cout << "Definition!\n";}
+               ;
+
+arg_list => 
+          | struct_declaration_list
+          ;
+
+term => IDENTIFIER;
 
 struct_specifier => STRUCT IDENTIFIER ASSIGN struct_declaration_list {std::cout << "STRUCT!\n";}
                   ; 

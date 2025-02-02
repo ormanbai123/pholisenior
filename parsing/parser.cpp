@@ -30,9 +30,14 @@ parsing::parser::statesymbol::equal_to::operator( ) ( const statesymbol& ss1,
 
 // Definitions of the reduction functions:
 
-auto parsing::parser::body4( ) -> void
+auto parsing::parser::body5( ) -> void
 {
-#line 50 "parsing/grammar.m"
+#line 51 "parsing/grammar.m"
+std::cout << "Definition!\n";}
+
+auto parsing::parser::body9( ) -> void
+{
+#line 60 "parsing/grammar.m"
 std::cout << "STRUCT!\n";}
 
 
@@ -235,43 +240,64 @@ mainloop:
          goto mainloop;
          break;
       case 3:
-         reduce( parsing::sym_Expr, std::monostate( ), 1 );
+         reduce( parsing::sym_Statement, std::monostate( ), 1 );
          goto mainloop;
          break;
       case 4:
-         body4( );
-         reduce( parsing::sym_struct_specifier, std::monostate( ), 4 );
+         reduce( parsing::sym_Statement, std::monostate( ), 1 );
          goto mainloop;
          break;
       case 5:
-         reduce( parsing::sym_struct_declaration_list, std::monostate( ), 1 );
+         body5( );
+         reduce( parsing::sym_def_specifier, std::monostate( ), 7 );
          goto mainloop;
          break;
       case 6:
-         reduce( parsing::sym_struct_declaration_list, std::monostate( ), 3 );
+         reduce( parsing::sym_arg_list, std::monostate( ), 0 );
          goto mainloop;
          break;
       case 7:
-         reduce( parsing::sym_struct_declaration, std::monostate( ), 3 );
+         reduce( parsing::sym_arg_list, std::monostate( ), 1 );
          goto mainloop;
          break;
       case 8:
-         reduce( parsing::sym_type, std::monostate( ), 1 );
+         reduce( parsing::sym_term, std::monostate( ), 1 );
          goto mainloop;
          break;
       case 9:
-         reduce( parsing::sym_type, std::monostate( ), 1 );
+         body9( );
+         reduce( parsing::sym_struct_specifier, std::monostate( ), 4 );
          goto mainloop;
          break;
       case 10:
-         reduce( parsing::sym_func, std::monostate( ), 4 );
+         reduce( parsing::sym_struct_declaration_list, std::monostate( ), 1 );
          goto mainloop;
          break;
       case 11:
-         reduce( parsing::sym_type_list, std::monostate( ), 1 );
+         reduce( parsing::sym_struct_declaration_list, std::monostate( ), 3 );
          goto mainloop;
          break;
       case 12:
+         reduce( parsing::sym_struct_declaration, std::monostate( ), 3 );
+         goto mainloop;
+         break;
+      case 13:
+         reduce( parsing::sym_type, std::monostate( ), 1 );
+         goto mainloop;
+         break;
+      case 14:
+         reduce( parsing::sym_type, std::monostate( ), 1 );
+         goto mainloop;
+         break;
+      case 15:
+         reduce( parsing::sym_func, std::monostate( ), 4 );
+         goto mainloop;
+         break;
+      case 16:
+         reduce( parsing::sym_type_list, std::monostate( ), 1 );
+         goto mainloop;
+         break;
+      case 17:
          reduce( parsing::sym_type_list, std::monostate( ), 3 );
          goto mainloop;
          break;
@@ -629,21 +655,24 @@ const std::unordered_map< parsing::symbolval, std::pair< size_t, std::unordered_
 
 const std::vector< std::pair< char, size_t >> parsing::parser::reductioninfo =
 {
-   { 'D', 0 }, { 'N', 0 }, { 'N', 0 }, { 'T', 3 }, { 'N', 0 }, { 'N', 0 }, { 'N', 0 }, { 'T', 2 },
-   { 'T', 1 }, { 'N', 0 }, { 'N', 0 }, { 'D', 5 }, { 'T', 4 }, { 'N', 0 }, { 'N', 0 }, { 'T', 9 },
-   { 'T', 8 }, { 'D', 7 }, { 'T', 6 }, { 'N', 0 }, { 'D', 11 }, { 'N', 0 }, { 'T', 10 }, { 'N', 0 },
-   { 'D', 12 }
+   { 'D', 0 }, { 'N', 0 }, { 'N', 0 }, { 'T', 3 }, { 'T', 4 }, { 'N', 0 }, { 'N', 0 }, { 'N', 0 },
+   { 'N', 0 }, { 'T', 2 }, { 'N', 0 }, { 'T', 1 }, { 'N', 0 }, { 'D', 6 }, { 'N', 0 }, { 'D', 10 },
+   { 'T', 9 }, { 'T', 7 }, { 'N', 0 }, { 'N', 0 }, { 'N', 0 }, { 'N', 0 }, { 'T', 13 }, { 'T', 14 },
+   { 'D', 12 }, { 'T', 11 }, { 'N', 0 }, { 'N', 0 }, { 'T', 8 }, { 'T', 5 }, { 'D', 16 }, { 'N', 0 },
+   { 'T', 15 }, { 'N', 0 }, { 'D', 17 }
 };
 
 const parsing::parser::statesymbol::map< size_t > parsing::parser::shifts =
 {
-   { { 23, parsing::sym_IDENTIFIER }, 16 }, { { 5, parsing::sym_SEMICOLON }, 8 }, { { 9, parsing::sym_IDENTIFIER }, 10 }, { { 9, parsing::sym_struct_declaration_list }, 12 }, { { 17, parsing::sym_LPAR }, 19 },
-   { { 10, parsing::sym_COLON }, 13 }, { { 21, parsing::sym_COMMA }, 23 }, { { 4, parsing::sym_SEMICOLON }, 7 }, { { 21, parsing::sym_RPAR }, 22 }, { { 24, parsing::sym_LPAR }, 19 },
-   { { 1, parsing::sym_STRUCT }, 2 }, { { 1, parsing::sym__recover_ }, 4 }, { { 0, parsing::sym_Session }, 1 }, { { 2, parsing::sym_IDENTIFIER }, 6 }, { { 14, parsing::sym_struct_declaration }, 11 },
-   { { 1, parsing::sym_struct_specifier }, 3 }, { { 23, parsing::sym_func }, 15 }, { { 19, parsing::sym_type_list }, 21 }, { { 1, parsing::sym_Expr }, 5 }, { { 11, parsing::sym_COMMA }, 14 },
-   { { 13, parsing::sym_type }, 17 }, { { 9, parsing::sym_struct_declaration }, 11 }, { { 13, parsing::sym_IDENTIFIER }, 16 }, { { 13, parsing::sym_func }, 15 }, { { 14, parsing::sym_IDENTIFIER }, 10 },
-   { { 14, parsing::sym_struct_declaration_list }, 18 }, { { 19, parsing::sym_type }, 20 }, { { 19, parsing::sym_func }, 15 }, { { 6, parsing::sym_ASSIGN }, 9 }, { { 20, parsing::sym_LPAR }, 19 },
-   { { 19, parsing::sym_IDENTIFIER }, 16 }, { { 23, parsing::sym_type }, 24 }
+   { { 33, parsing::sym_IDENTIFIER }, 22 }, { { 33, parsing::sym_func }, 23 }, { { 31, parsing::sym_COMMA }, 33 }, { { 30, parsing::sym_LPAR }, 27 }, { { 34, parsing::sym_LPAR }, 27 },
+   { { 27, parsing::sym_IDENTIFIER }, 22 }, { { 27, parsing::sym_type }, 30 }, { { 26, parsing::sym_IDENTIFIER }, 28 }, { { 26, parsing::sym_term }, 29 }, { { 24, parsing::sym_LPAR }, 27 },
+   { { 21, parsing::sym_ASSIGN }, 26 }, { { 10, parsing::sym_LPAR }, 13 }, { { 19, parsing::sym_func }, 23 }, { { 5, parsing::sym_SEMICOLON }, 9 }, { { 1, parsing::sym__recover_ }, 5 },
+   { { 1, parsing::sym_STRUCT }, 2 }, { { 1, parsing::sym_Statement }, 7 }, { { 1, parsing::sym_DEF }, 6 }, { { 27, parsing::sym_type_list }, 31 }, { { 2, parsing::sym_IDENTIFIER }, 8 },
+   { { 7, parsing::sym_SEMICOLON }, 11 }, { { 1, parsing::sym_struct_specifier }, 3 }, { { 19, parsing::sym_IDENTIFIER }, 22 }, { { 15, parsing::sym_COMMA }, 20 }, { { 33, parsing::sym_type }, 34 },
+   { { 12, parsing::sym_struct_declaration_list }, 16 }, { { 1, parsing::sym_def_specifier }, 4 }, { { 12, parsing::sym_struct_declaration }, 15 }, { { 13, parsing::sym_IDENTIFIER }, 14 }, { { 6, parsing::sym_IDENTIFIER }, 10 },
+   { { 13, parsing::sym_struct_declaration_list }, 17 }, { { 12, parsing::sym_IDENTIFIER }, 14 }, { { 13, parsing::sym_arg_list }, 18 }, { { 13, parsing::sym_struct_declaration }, 15 }, { { 20, parsing::sym_struct_declaration }, 15 },
+   { { 14, parsing::sym_COLON }, 19 }, { { 27, parsing::sym_func }, 23 }, { { 18, parsing::sym_RPAR }, 21 }, { { 19, parsing::sym_type }, 24 }, { { 31, parsing::sym_RPAR }, 32 },
+   { { 0, parsing::sym_Session }, 1 }, { { 20, parsing::sym_struct_declaration_list }, 25 }, { { 8, parsing::sym_ASSIGN }, 12 }, { { 20, parsing::sym_IDENTIFIER }, 14 }
 };
 
 const parsing::parser::statesymbol::map< std::vector< size_t >> parsing::parser::reductions =

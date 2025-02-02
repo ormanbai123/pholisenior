@@ -15,9 +15,6 @@ parsing::tokenizer::buildclassifier()
     auto digit = range('0', '9');
     cls.insert((just('_') | letter) * (just('_') | letter | digit).star(), symbolval::sym_IDENTIFIER);
 
-   cls.insert(just('O'), parsing::symbolval::sym_OBJ);
-   cls.insert(just('T'), parsing::symbolval::sym_TRUTHVAL);
-
    // Single-double char tokens
    cls.insert(just(']'), parsing::symbolval::sym_RBRACKET);
    cls.insert(just('['), parsing::symbolval::sym_LBRACKET);

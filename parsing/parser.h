@@ -14,7 +14,7 @@
 
 #include "symbol.h"
 
-#line 31 "parsing/grammar.m"
+#line 30 "parsing/grammar.m"
  #include "tokenizer.h" 
 #line 18 "idee.x"
  
@@ -198,7 +198,8 @@ public:
    // Declarations of reduction functions and their conditions:
    // They have no arguments because they use the stack.
 
-   void body4( );
+   void body5( );
+   void body9( );
 
 
 };

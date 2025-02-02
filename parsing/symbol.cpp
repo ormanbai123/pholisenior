@@ -82,90 +82,94 @@ const char* parsing::getcstring( symbolval val )
 {
    switch( val )
    {
-   case sym_type_list :
-      return "type_list";
-   case sym_type :
-      return "type";
-   case sym_struct_declaration :
-      return "struct_declaration";
-   case sym_struct_specifier :
-      return "struct_specifier";
    case sym_FRM :
       return "FRM";
-   case sym_IMPLY :
-      return "IMPLY";
-   case sym_OR :
-      return "OR";
-   case sym_EOF :
-      return "EOF";
-   case sym_LBRACE :
-      return "LBRACE";
-   case sym__recover_ :
-      return "_recover_";
-   case sym_STRUCT :
-      return "STRUCT";
-   case sym_LPAR :
-      return "LPAR";
-   case sym_Session :
-      return "Session";
-   case sym_RPAR :
-      return "RPAR";
-   case sym_struct_declaration_list :
-      return "struct_declaration_list";
    case sym_DEF :
       return "DEF";
-   case sym_AND :
-      return "AND";
-   case sym_COMMENT :
-      return "COMMENT";
-   case sym_func :
-      return "func";
-   case sym_EQ :
-      return "EQ";
    case sym_IDENTIFIER :
       return "IDENTIFIER";
+   case sym_OR :
+      return "OR";
+   case sym_EXISTS :
+      return "EXISTS";
    case sym_FORALL :
       return "FORALL";
-   case sym_EMPTY :
-      return "EMPTY";
-   case sym_WHITESPACE :
-      return "WHITESPACE";
-   case sym_LT :
-      return "LT";
    case sym_COLON :
       return "COLON";
-   case sym_SEMICOLON :
-      return "SEMICOLON";
-   case sym_RBRACE :
-      return "RBRACE";
-   case sym_FILEBAD :
-      return "FILEBAD";
-   case sym_LBRACKET :
-      return "LBRACKET";
-   case sym_Expr :
-      return "Expr";
-   case sym_GT :
-      return "GT";
-   case sym_RBRACKET :
-      return "RBRACKET";
-   case sym_LT_EQ :
-      return "LT_EQ";
-   case sym_GT_EQ :
-      return "GT_EQ";
-   case sym_SCANERROR :
-      return "SCANERROR";
    case sym_ASSIGN :
       return "ASSIGN";
    case sym_COMMA :
       return "COMMA";
+   case sym_func :
+      return "func";
+   case sym_SCANERROR :
+      return "SCANERROR";
+   case sym_struct_specifier :
+      return "struct_specifier";
+   case sym_type :
+      return "type";
+   case sym_EQ :
+      return "EQ";
+   case sym_AND :
+      return "AND";
    case sym_DOT :
       return "DOT";
-   case sym_OBJ :
-      return "OBJ";
-   case sym_TRUTHVAL :
-      return "TRUTHVAL";
-   case sym_EXISTS :
-      return "EXISTS";
+   case sym_GT_EQ :
+      return "GT_EQ";
+   case sym_struct_declaration :
+      return "struct_declaration";
+   case sym_RBRACKET :
+      return "RBRACKET";
+   case sym_def_specifier :
+      return "def_specifier";
+   case sym_LPAR :
+      return "LPAR";
+   case sym_struct_declaration_list :
+      return "struct_declaration_list";
+   case sym_EOF :
+      return "EOF";
+   case sym_IMPLY :
+      return "IMPLY";
+   case sym_term :
+      return "term";
+   case sym_Statement :
+      return "Statement";
+   case sym_arg_list :
+      return "arg_list";
+   case sym_COMMENT :
+      return "COMMENT";
+   case sym_Session :
+      return "Session";
+   case sym_STRUCT :
+      return "STRUCT";
+   case sym_FILEBAD :
+      return "FILEBAD";
+   case sym_SEMICOLON :
+      return "SEMICOLON";
+   case sym_GT :
+      return "GT";
+   case sym_EMPTY :
+      return "EMPTY";
+   case sym_Expr :
+      return "Expr";
+   case sym_RPAR :
+      return "RPAR";
+   case sym_WHITESPACE :
+      return "WHITESPACE";
+   case sym_LBRACE :
+      return "LBRACE";
+   case sym_RBRACE :
+      return "RBRACE";
+   case sym__recover_ :
+      return "_recover_";
+   case sym_LBRACKET :
+      return "LBRACKET";
+   case sym_type_list :
+      return "type_list";
+   case sym_LT :
+      return "LT";
+   case sym_LT_EQ :
+      return "LT_EQ";
    }
    return "(unknown symbol type)";
       // unreachable, but makes the compiler shut up.
@@ -197,47 +201,49 @@ bool parsing::symbol::has_correct_attribute( ) const
    {
    case sym_SCANERROR :
       return std::holds_alternative< std::string > ( attr );
-   case sym_type_list :
-   case sym_type :
-   case sym_struct_declaration :
-   case sym_struct_specifier :
    case sym_FRM :
-   case sym_IMPLY :
-   case sym_OR :
-   case sym_EOF :
-   case sym_LBRACE :
-   case sym__recover_ :
-   case sym_STRUCT :
-   case sym_LPAR :
-   case sym_Session :
-   case sym_RPAR :
-   case sym_struct_declaration_list :
    case sym_DEF :
-   case sym_AND :
-   case sym_COMMENT :
-   case sym_func :
-   case sym_EQ :
    case sym_IDENTIFIER :
+   case sym_OR :
+   case sym_EXISTS :
    case sym_FORALL :
-   case sym_EMPTY :
-   case sym_WHITESPACE :
-   case sym_LT :
    case sym_COLON :
-   case sym_SEMICOLON :
-   case sym_RBRACE :
-   case sym_FILEBAD :
-   case sym_LBRACKET :
-   case sym_Expr :
-   case sym_GT :
-   case sym_RBRACKET :
-   case sym_LT_EQ :
-   case sym_GT_EQ :
    case sym_ASSIGN :
    case sym_COMMA :
+   case sym_func :
+   case sym_struct_specifier :
+   case sym_type :
+   case sym_EQ :
+   case sym_AND :
    case sym_DOT :
-   case sym_OBJ :
-   case sym_TRUTHVAL :
-   case sym_EXISTS :
+   case sym_GT_EQ :
+   case sym_struct_declaration :
+   case sym_RBRACKET :
+   case sym_def_specifier :
+   case sym_LPAR :
+   case sym_struct_declaration_list :
+   case sym_EOF :
+   case sym_IMPLY :
+   case sym_term :
+   case sym_Statement :
+   case sym_arg_list :
+   case sym_COMMENT :
+   case sym_Session :
+   case sym_STRUCT :
+   case sym_FILEBAD :
+   case sym_SEMICOLON :
+   case sym_GT :
+   case sym_EMPTY :
+   case sym_Expr :
+   case sym_RPAR :
+   case sym_WHITESPACE :
+   case sym_LBRACE :
+   case sym_RBRACE :
+   case sym__recover_ :
+   case sym_LBRACKET :
+   case sym_type_list :
+   case sym_LT :
+   case sym_LT_EQ :
       return std::holds_alternative< std::monostate > ( attr );
    }
 
