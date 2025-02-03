@@ -14,3 +14,5 @@ parsing/parser.*
 parsing/location.h
 parsing/symbol.*
 ./parser
+./maphoon2024
+./lexing2023

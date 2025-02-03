@@ -1,0 +1,1019 @@
+filereader( gram.m, 173, 0 ) :  (end of file)
+lookahead: eof/0
+
+symbolcodebuilder:
+
+code for .h:
+from file gram.m, line 42 :
+   42 :    #include <vector> 
+
+
+namespace:
+   
+
+infotype: void
+
+declared attributes:
+   EMPTY : void
+   MODULO : void
+   TIMES : void
+   LPAR : void
+   PLUS : void
+   G : double
+   MINUS : void
+   RPAR : void
+   Debug : void
+   ASSIGN : void
+   SEMICOLON : void
+   IDENT : std::string
+   DIVIDES : void
+   H : double
+   Arguments : std::vector<double>
+   COMMA : void
+   Command : void
+   DOUBLE : double
+   SCANERROR : std::string
+   Quit : void
+   BAD : void
+   EOF : void
+   Nodebug : void
+   WHITESPACE : void
+   FACTORIAL : void
+   F : double
+   E : double
+   Session : void
+   Show : void
+   COMMENT : void
+
+
+parsercodebuilder:
+
+namespace =      
+source =          from file , line 48 :
+   48 :    {tok}. {read}( ); 
+
+parameters:
+   memory :       std::map<std::string, double>
+   errorlog :       std::vector<std::string>
+   tok :       tokenizer
+
+code for .h:
+from file gram.m, line 43 :
+   43 :    #include <map> 
+   44 :    #include "tokenizer.h" 
+   45 :    #include <cmath> 
+
+
+Start Symbols with their Lookahead Sets:
+   Session : { EOF }
+
+
+Rules:
+
+(0)   Session  =>  Session Command
+(1)   Session  =>  
+(2)   Command  =>  E SEMICOLON
+(3)   Command  =>  IDENT ASSIGN E SEMICOLON
+(4)   Command  =>  Quit SEMICOLON
+(5)   Command  =>  Show SEMICOLON
+(6)   Command  =>  Debug SEMICOLON
+(7)   Command  =>  Nodebug SEMICOLON
+(8)   Command  =>  _recover_ SEMICOLON
+(9)   E  =>  E PLUS F
+(10)   E  =>  E MINUS F
+(11)   E  =>  F
+(12)   F  =>  F TIMES G
+(13)   F  =>  F DIVIDES G
+(14)   F  =>  F MODULO G
+(15)   F  =>  G
+(16)   G  =>  MINUS G
+(17)   G  =>  PLUS G
+(18)   G  =>  H
+(19)   H  =>  H FACTORIAL
+(20)   H  =>  LPAR E RPAR
+(21)   H  =>  IDENT
+(22)   H  =>  DOUBLE
+(23)   H  =>  IDENT LPAR Arguments RPAR
+(24)   Arguments  =>  E
+(25)   Arguments  =>  Arguments COMMA E
+(26)   Quit  =>  IDENT
+(27)   Show  =>  IDENT
+(28)   Debug  =>  IDENT
+(29)   Nodebug  =>  IDENT
+
+
+
+Reduction Sequences:
+   H/4, Nodebug/3, Debug/2, Show/1, Quit/0
+
+#6: reduction
+from file gram.m, line 63 :
+   63 :    {debug} = 1; 
+
+#7: reduction
+from file gram.m, line 64 :
+   64 :    {debug} = 0; 
+
+#9: reduction( f : 2, e : 0 )
+from file gram.m, line 68 :
+   68 :    {return} {e} + {f}; 
+
+#10: reduction( f : 2, e : 0 )
+from file gram.m, line 69 :
+   69 :    {return} {e} - {f}; 
+
+#11: reduction( f : 0 )
+from file gram.m, line 70 :
+   70 :    {return} {f}; 
+
+#12: reduction( g : 2, f : 0 )
+from file gram.m, line 73 :
+   73 :    {return} {f} * {g}; 
+
+#13: reduction( g : 2, f : 0 )
+from file gram.m, line 76 :
+   76 :   
+   77 :      {if}( {g} == 0.0 ) 
+   78 :      {
+   79 :         {errorlog}. {push_back}( "division by zero" ); 
+   80 :            {g} = 1.0;   // invent a value. 
+   81 :      }
+   82 :      {return} {f} / {g};  
+
+
+#14: reduction( g : 2, f : 0 )
+from file gram.m, line 87 :
+   87 :   
+   88 :      {if}( {g} == 0.0 )
+   89 :      {
+   90 :         {errorlog}. {push_back}( "modulo by zero" );
+   91 :         {g} = 1.0;
+   92 :      }
+   93 :       
+   94 :      {return} {f} - {g} * {floor}( {f} / {g} ); 
+
+
+#15: reduction( g : 0 )
+from file gram.m, line 97 :
+   97 :    {return} {g}; 
+
+#16: reduction( g : 1 )
+from file gram.m, line 100 :
+   100 :    {return} -{g}; 
+
+#17: reduction( g : 1 )
+from file gram.m, line 101 :
+   101 :    {return} {g}; 
+
+#18: reduction( h : 0 )
+from file gram.m, line 102 :
+   102 :    {return} {h}; 
+
+#19: reduction( h : 0 )
+from file gram.m, line 106 :
+   106 :   
+   107 :      {unsigned} {int} {f} = {static_cast}< {unsigned} {int} >
+   108 :            ( {floor}( {h} + 0.0001 ));
+   109 :      {return} {fact}({f});  
+
+
+#20: reduction( e : 1 )
+from file gram.m, line 112 :
+   112 :    {return} {e}; 
+
+#21: reduction( id : 0 )
+from file gram.m, line 114 :
+   114 :   
+   115 :      {if}( {memory}. {contains}({id}))
+   116 :         {return} {memory}. {at}( {id} );
+   117 :      {else}
+   118 :      {
+   119 :         {errorlog}. {push_back}( {std}::{string}( "variable " ) + {id} + 
+   120 :                              " is undefined " );
+   121 :         {return} 0.0;  
+   122 :      }
+
+
+#22: reduction( d : 0 )
+from file gram.m, line 125 :
+   125 :    {return} {d}; 
+
+#23: reduction( args : 2, id : 0 )
+from file gram.m, line 128 :
+   128 :    
+   129 :      {if}( {id} == "sin" && {args}. {size}( ) == 1 ) 
+   130 :         {return} {sin}( {args}[0] ); 
+   131 :   
+   132 :      {if}( {id} == "cos" && {args}. {size}( ) == 1 )
+   133 :         {return} {cos}( {args}[0] );
+   134 :   
+   135 :      {if}( {id} == "sqrt" && {args}. {size}( ) == 1 )
+   136 :         {return} {sqrt}( {args}[0] ); 
+   137 :   
+   138 :      {if}( {id} == "pow" && {args}. {size}( ) == 2 )
+   139 :      {
+   140 :         {return} {pow}( {args}[0], {args}[1] );
+   141 :      }
+   142 :      
+   143 :      {errorlog}. {push_back}( {std}::{string}( "calling unknown function " ) + {id} );
+   144 :      {return} 0.0;
+
+
+#24: reduction( e : 0 )
+from file gram.m, line 149 :
+   149 :     {return} { {e} };   
+
+#25: reduction( e : 2, a : 0 )
+from file gram.m, line 150 :
+   150 :    {a}. {push_back}({e}); {return} {a}; 
+
+#26: reduction( id : 0 )
+? from file gram.m, line 154 :
+   154 :    {return} {id} == "quit"; 
+
+#27: reduction( id : 0 )
+? from file gram.m, line 158 :
+   158 :    {return} {id} == "show"; 
+
+#28: reduction( id : 0 )
+? from file gram.m, line 162 :
+   162 :    {return} {id} == "debug"; 
+
+#29: reduction( id : 0 )
+? from file gram.m, line 166 :
+   166 :    {return} {id} == "nodebug"; 
+
+
+Possible error messages ( trigger => expectation ):
+   IDENT LPAR => "a function argument"
+   F ( DIVIDES | TIMES ) => "a factor"
+
+
+input was read succesfully
+
+warning: the following symbols have been declared, but do not occur in the grammar:
+   { COMMENT, WHITESPACE, BAD, SCANERROR, EMPTY }
+starting closure
+all states have been generated
+adding reductions
+ending closure
+
+Parsetable:
+====================================
+
+Initial States:
+   Session : state 0
+
+
+state 0:
+   Session =>  # Session Command  /  { EOF }
+   Session =>  #  /  { LPAR, DOUBLE, E, EOF, Nodebug, MINUS, Debug, Show, Quit, F, PLUS, G, H, IDENT, _recover_, Command }
+
+Shifts:
+   Session :  1
+
+Reductions:
+   LPAR :  1
+   DOUBLE :  1
+   E :  1
+   EOF :  1
+   Nodebug :  1
+   MINUS :  1
+   Debug :  1
+   Show :  1
+   Quit :  1
+   F :  1
+   PLUS :  1
+   G :  1
+   Command :  1
+   _recover_ :  1
+   IDENT :  1
+   H :  1
+
+
+state 1:
+   Session =>  Session # Command  /  { LPAR, DOUBLE, E, EOF, Nodebug, MINUS, Debug, Show, Quit, F, PLUS, G, Command, _recover_, IDENT, H }
+
+Shifts:
+   DOUBLE :  2
+   LPAR :  3
+   F :  4
+   E :  5
+   PLUS :  6
+   G :  7
+   Show :  8
+   H :  16
+   Command :  15
+   _recover_ :  13
+   IDENT :  14
+   Quit :  9
+   Nodebug :  10
+   Debug :  11
+   MINUS :  12
+
+
+state 2:
+   H =>  DOUBLE #  /  { COMMA, RPAR, SEMICOLON, MINUS, TIMES, DIVIDES, PLUS, FACTORIAL, MODULO }
+
+Reductions:
+   MODULO :  22
+   FACTORIAL :  22
+   PLUS :  22
+   DIVIDES :  22
+   TIMES :  22
+   MINUS :  22
+   SEMICOLON :  22
+   RPAR :  22
+   COMMA :  22
+
+
+state 3:
+   H =>  LPAR # E RPAR  /  { COMMA, RPAR, SEMICOLON, MINUS, TIMES, DIVIDES, PLUS, FACTORIAL, MODULO }
+
+Shifts:
+   MINUS :  12
+   PLUS :  6
+   E :  18
+   H :  16
+   LPAR :  3
+   IDENT :  17
+   F :  4
+   DOUBLE :  2
+   G :  7
+
+
+state 4:
+   F =>  F # MODULO G  /  { COMMA, RPAR, SEMICOLON, PLUS, MODULO, DIVIDES, TIMES, MINUS }
+   E =>  F #  /  { COMMA, RPAR, MINUS, PLUS, SEMICOLON }
+   F =>  F # DIVIDES G  /  { COMMA, RPAR, SEMICOLON, PLUS, MODULO, DIVIDES, TIMES, MINUS }
+   F =>  F # TIMES G  /  { COMMA, RPAR, SEMICOLON, PLUS, MODULO, DIVIDES, TIMES, MINUS }
+
+Shifts:
+   TIMES :  21
+   DIVIDES :  20
+   MODULO :  19
+
+Reductions:
+   SEMICOLON :  11
+   PLUS :  11
+   MINUS :  11
+   RPAR :  11
+   COMMA :  11
+
+
+state 5:
+   E =>  E # PLUS F  /  { MINUS, PLUS, SEMICOLON }
+   E =>  E # MINUS F  /  { MINUS, PLUS, SEMICOLON }
+   Command =>  E # SEMICOLON  /  { LPAR, DOUBLE, E, Show, H, IDENT, _recover_, Command, PLUS, G, F, Quit, Debug, MINUS, Nodebug, EOF }
+
+Shifts:
+   SEMICOLON :  24
+   MINUS :  23
+   PLUS :  22
+
+
+state 6:
+   G =>  PLUS # G  /  { COMMA, RPAR, SEMICOLON, PLUS, MINUS, TIMES, DIVIDES, MODULO }
+
+Shifts:
+   G :  25
+   PLUS :  6
+   H :  16
+   MINUS :  12
+   IDENT :  17
+   DOUBLE :  2
+   LPAR :  3
+
+
+state 7:
+   F =>  G #  /  { COMMA, RPAR, SEMICOLON, PLUS, MODULO, DIVIDES, TIMES, MINUS }
+
+Reductions:
+   MINUS :  15
+   TIMES :  15
+   DIVIDES :  15
+   MODULO :  15
+   PLUS :  15
+   SEMICOLON :  15
+   RPAR :  15
+   COMMA :  15
+
+
+state 8:
+   Command =>  Show # SEMICOLON  /  { LPAR, DOUBLE, E, Show, H, IDENT, _recover_, Command, PLUS, G, F, Quit, Debug, MINUS, Nodebug, EOF }
+
+Shifts:
+   SEMICOLON :  26
+
+
+state 9:
+   Command =>  Quit # SEMICOLON  /  { LPAR, DOUBLE, E, Show, H, IDENT, _recover_, Command, PLUS, G, F, Quit, Debug, MINUS, Nodebug, EOF }
+
+Shifts:
+   SEMICOLON :  27
+
+
+state 10:
+   Command =>  Nodebug # SEMICOLON  /  { LPAR, DOUBLE, E, Show, H, IDENT, _recover_, Command, PLUS, G, F, Quit, Debug, MINUS, Nodebug, EOF }
+
+Shifts:
+   SEMICOLON :  28
+
+
+state 11:
+   Command =>  Debug # SEMICOLON  /  { LPAR, DOUBLE, E, Show, H, IDENT, _recover_, Command, PLUS, G, F, Quit, Debug, MINUS, Nodebug, EOF }
+
+Shifts:
+   SEMICOLON :  29
+
+
+state 12:
+   G =>  MINUS # G  /  { COMMA, RPAR, SEMICOLON, PLUS, MINUS, TIMES, DIVIDES, MODULO }
+
+Shifts:
+   G :  30
+   MINUS :  12
+   H :  16
+   PLUS :  6
+   IDENT :  17
+   DOUBLE :  2
+   LPAR :  3
+
+
+state 13:
+   Command =>  _recover_ # SEMICOLON  /  { LPAR, DOUBLE, E, Show, H, IDENT, _recover_, Command, PLUS, G, F, Quit, Debug, MINUS, Nodebug, EOF }
+
+Shifts:
+   SEMICOLON :  31
+
+
+state 14:
+   H =>  IDENT # LPAR Arguments RPAR  /  { SEMICOLON, MINUS, TIMES, DIVIDES, PLUS, FACTORIAL, MODULO }
+   H =>  IDENT #  /  { SEMICOLON, MINUS, TIMES, DIVIDES, PLUS, FACTORIAL, MODULO }
+   Quit =>  IDENT #  /  { SEMICOLON }
+   Show =>  IDENT #  /  { SEMICOLON }
+   Debug =>  IDENT #  /  { SEMICOLON }
+   Command =>  IDENT # ASSIGN E SEMICOLON  /  { LPAR, DOUBLE, E, Show, H, IDENT, _recover_, Command, PLUS, G, F, Quit, Debug, MINUS, Nodebug, EOF }
+   Nodebug =>  IDENT #  /  { SEMICOLON }
+
+Shifts:
+   ASSIGN :  33
+   LPAR :  32
+
+Reductions:
+   MODULO :  21
+   FACTORIAL :  21
+   PLUS :  21
+   DIVIDES :  21
+   TIMES :  21
+   MINUS :  21
+   SEMICOLON :  29, 28, 27, 26, 21
+
+
+state 15:
+   Session =>  Session Command #  /  { LPAR, DOUBLE, E, EOF, Nodebug, MINUS, Debug, Show, Quit, F, PLUS, G, Command, _recover_, IDENT, H }
+
+Reductions:
+   LPAR :  0
+   DOUBLE :  0
+   E :  0
+   EOF :  0
+   Nodebug :  0
+   MINUS :  0
+   Debug :  0
+   Show :  0
+   Quit :  0
+   F :  0
+   PLUS :  0
+   G :  0
+   H :  0
+   IDENT :  0
+   _recover_ :  0
+   Command :  0
+
+
+state 16:
+   G =>  H #  /  { COMMA, RPAR, SEMICOLON, PLUS, MINUS, TIMES, DIVIDES, MODULO }
+   H =>  H # FACTORIAL  /  { COMMA, RPAR, SEMICOLON, MINUS, TIMES, DIVIDES, PLUS, FACTORIAL, MODULO }
+
+Shifts:
+   FACTORIAL :  34
+
+Reductions:
+   MODULO :  18
+   DIVIDES :  18
+   TIMES :  18
+   MINUS :  18
+   PLUS :  18
+   SEMICOLON :  18
+   RPAR :  18
+   COMMA :  18
+
+
+state 17:
+   H =>  IDENT # LPAR Arguments RPAR  /  { COMMA, SEMICOLON, RPAR, MINUS, TIMES, DIVIDES, PLUS, FACTORIAL, MODULO }
+   H =>  IDENT #  /  { COMMA, SEMICOLON, RPAR, MINUS, TIMES, DIVIDES, PLUS, FACTORIAL, MODULO }
+
+Shifts:
+   LPAR :  32
+
+Reductions:
+   MODULO :  21
+   FACTORIAL :  21
+   PLUS :  21
+   DIVIDES :  21
+   TIMES :  21
+   MINUS :  21
+   RPAR :  21
+   SEMICOLON :  21
+   COMMA :  21
+
+
+state 18:
+   E =>  E # PLUS F  /  { MINUS, PLUS, RPAR }
+   E =>  E # MINUS F  /  { MINUS, PLUS, RPAR }
+   H =>  LPAR E # RPAR  /  { RPAR, COMMA, SEMICOLON, MINUS, TIMES, DIVIDES, PLUS, FACTORIAL, MODULO }
+
+Shifts:
+   RPAR :  35
+   MINUS :  23
+   PLUS :  22
+
+
+state 19:
+   F =>  F MODULO # G  /  { COMMA, RPAR, SEMICOLON, PLUS, MODULO, DIVIDES, TIMES, MINUS }
+
+Shifts:
+   G :  36
+   H :  16
+   PLUS :  6
+   MINUS :  12
+   IDENT :  17
+   DOUBLE :  2
+   LPAR :  3
+
+
+state 20:
+   F =>  F DIVIDES # G  /  { COMMA, RPAR, SEMICOLON, PLUS, MODULO, DIVIDES, TIMES, MINUS }
+
+Shifts:
+   G :  37
+   H :  16
+   PLUS :  6
+   MINUS :  12
+   IDENT :  17
+   DOUBLE :  2
+   LPAR :  3
+
+
+state 21:
+   F =>  F TIMES # G  /  { COMMA, RPAR, SEMICOLON, PLUS, MODULO, DIVIDES, TIMES, MINUS }
+
+Shifts:
+   G :  38
+   H :  16
+   PLUS :  6
+   MINUS :  12
+   IDENT :  17
+   DOUBLE :  2
+   LPAR :  3
+
+
+state 22:
+   E =>  E PLUS # F  /  { COMMA, RPAR, MINUS, PLUS, SEMICOLON }
+
+Shifts:
+   F :  39
+   DOUBLE :  2
+   G :  7
+   H :  16
+   PLUS :  6
+   MINUS :  12
+   IDENT :  17
+   LPAR :  3
+
+
+state 23:
+   E =>  E MINUS # F  /  { COMMA, RPAR, MINUS, PLUS, SEMICOLON }
+
+Shifts:
+   F :  40
+   IDENT :  17
+   G :  7
+   H :  16
+   PLUS :  6
+   MINUS :  12
+   DOUBLE :  2
+   LPAR :  3
+
+
+state 24:
+   Command =>  E SEMICOLON #  /  { LPAR, DOUBLE, E, Show, H, IDENT, _recover_, Command, PLUS, G, F, Quit, Debug, MINUS, Nodebug, EOF }
+
+Reductions:
+   EOF :  2
+   Nodebug :  2
+   LPAR :  2
+   DOUBLE :  2
+   E :  2
+   Show :  2
+   MINUS :  2
+   Debug :  2
+   _recover_ :  2
+   IDENT :  2
+   H :  2
+   Command :  2
+   PLUS :  2
+   G :  2
+   F :  2
+   Quit :  2
+
+
+state 25:
+   G =>  PLUS G #  /  { COMMA, RPAR, SEMICOLON, PLUS, MINUS, TIMES, DIVIDES, MODULO }
+
+Reductions:
+   MODULO :  17
+   DIVIDES :  17
+   TIMES :  17
+   MINUS :  17
+   PLUS :  17
+   SEMICOLON :  17
+   RPAR :  17
+   COMMA :  17
+
+
+state 26:
+   Command =>  Show SEMICOLON #  /  { LPAR, DOUBLE, E, Show, H, IDENT, _recover_, Command, PLUS, G, F, Quit, Debug, MINUS, Nodebug, EOF }
+
+Reductions:
+   EOF :  5
+   Nodebug :  5
+   LPAR :  5
+   DOUBLE :  5
+   E :  5
+   Show :  5
+   MINUS :  5
+   Debug :  5
+   _recover_ :  5
+   IDENT :  5
+   H :  5
+   Command :  5
+   PLUS :  5
+   G :  5
+   F :  5
+   Quit :  5
+
+
+state 27:
+   Command =>  Quit SEMICOLON #  /  { LPAR, DOUBLE, E, Show, H, IDENT, _recover_, Command, PLUS, G, F, Quit, Debug, MINUS, Nodebug, EOF }
+
+Reductions:
+   EOF :  4
+   Nodebug :  4
+   LPAR :  4
+   DOUBLE :  4
+   E :  4
+   Show :  4
+   MINUS :  4
+   Debug :  4
+   _recover_ :  4
+   IDENT :  4
+   H :  4
+   Command :  4
+   PLUS :  4
+   G :  4
+   F :  4
+   Quit :  4
+
+
+state 28:
+   Command =>  Nodebug SEMICOLON #  /  { LPAR, DOUBLE, E, Show, H, IDENT, _recover_, Command, PLUS, G, F, Quit, Debug, MINUS, Nodebug, EOF }
+
+Reductions:
+   EOF :  7
+   Nodebug :  7
+   LPAR :  7
+   DOUBLE :  7
+   E :  7
+   Show :  7
+   MINUS :  7
+   Debug :  7
+   _recover_ :  7
+   IDENT :  7
+   H :  7
+   Command :  7
+   PLUS :  7
+   G :  7
+   F :  7
+   Quit :  7
+
+
+state 29:
+   Command =>  Debug SEMICOLON #  /  { LPAR, DOUBLE, E, Show, H, IDENT, _recover_, Command, PLUS, G, F, Quit, Debug, MINUS, Nodebug, EOF }
+
+Reductions:
+   EOF :  6
+   Nodebug :  6
+   LPAR :  6
+   DOUBLE :  6
+   E :  6
+   Show :  6
+   MINUS :  6
+   Debug :  6
+   _recover_ :  6
+   IDENT :  6
+   H :  6
+   Command :  6
+   PLUS :  6
+   G :  6
+   F :  6
+   Quit :  6
+
+
+state 30:
+   G =>  MINUS G #  /  { COMMA, RPAR, SEMICOLON, PLUS, MINUS, TIMES, DIVIDES, MODULO }
+
+Reductions:
+   MODULO :  16
+   DIVIDES :  16
+   TIMES :  16
+   MINUS :  16
+   PLUS :  16
+   SEMICOLON :  16
+   RPAR :  16
+   COMMA :  16
+
+
+state 31:
+   Command =>  _recover_ SEMICOLON #  /  { LPAR, DOUBLE, E, Show, H, IDENT, _recover_, Command, PLUS, G, F, Quit, Debug, MINUS, Nodebug, EOF }
+
+Reductions:
+   EOF :  8
+   Nodebug :  8
+   LPAR :  8
+   DOUBLE :  8
+   E :  8
+   Show :  8
+   MINUS :  8
+   Debug :  8
+   _recover_ :  8
+   IDENT :  8
+   H :  8
+   Command :  8
+   PLUS :  8
+   G :  8
+   F :  8
+   Quit :  8
+
+
+state 32:
+   H =>  IDENT LPAR # Arguments RPAR  /  { COMMA, RPAR, SEMICOLON, MINUS, TIMES, DIVIDES, PLUS, FACTORIAL, MODULO }
+
+Shifts:
+   MINUS :  12
+   Arguments :  42
+   PLUS :  6
+   E :  41
+   H :  16
+   F :  4
+   LPAR :  3
+   IDENT :  17
+   DOUBLE :  2
+   G :  7
+
+
+state 33:
+   Command =>  IDENT ASSIGN # E SEMICOLON  /  { LPAR, DOUBLE, E, Show, H, IDENT, _recover_, Command, PLUS, G, F, Quit, Debug, MINUS, Nodebug, EOF }
+
+Shifts:
+   PLUS :  6
+   E :  43
+   H :  16
+   F :  4
+   LPAR :  3
+   IDENT :  17
+   MINUS :  12
+   DOUBLE :  2
+   G :  7
+
+
+state 34:
+   H =>  H FACTORIAL #  /  { COMMA, RPAR, SEMICOLON, MINUS, TIMES, DIVIDES, PLUS, FACTORIAL, MODULO }
+
+Reductions:
+   MODULO :  19
+   FACTORIAL :  19
+   PLUS :  19
+   DIVIDES :  19
+   TIMES :  19
+   MINUS :  19
+   SEMICOLON :  19
+   RPAR :  19
+   COMMA :  19
+
+
+state 35:
+   H =>  LPAR E RPAR #  /  { COMMA, RPAR, SEMICOLON, MINUS, TIMES, DIVIDES, PLUS, FACTORIAL, MODULO }
+
+Reductions:
+   MODULO :  20
+   FACTORIAL :  20
+   PLUS :  20
+   DIVIDES :  20
+   TIMES :  20
+   MINUS :  20
+   SEMICOLON :  20
+   RPAR :  20
+   COMMA :  20
+
+
+state 36:
+   F =>  F MODULO G #  /  { COMMA, RPAR, SEMICOLON, PLUS, MODULO, DIVIDES, TIMES, MINUS }
+
+Reductions:
+   MINUS :  14
+   TIMES :  14
+   DIVIDES :  14
+   MODULO :  14
+   PLUS :  14
+   SEMICOLON :  14
+   RPAR :  14
+   COMMA :  14
+
+
+state 37:
+   F =>  F DIVIDES G #  /  { COMMA, RPAR, SEMICOLON, PLUS, MODULO, DIVIDES, TIMES, MINUS }
+
+Reductions:
+   MINUS :  13
+   TIMES :  13
+   DIVIDES :  13
+   MODULO :  13
+   PLUS :  13
+   SEMICOLON :  13
+   RPAR :  13
+   COMMA :  13
+
+
+state 38:
+   F =>  F TIMES G #  /  { COMMA, RPAR, SEMICOLON, PLUS, MODULO, DIVIDES, TIMES, MINUS }
+
+Reductions:
+   MINUS :  12
+   TIMES :  12
+   DIVIDES :  12
+   MODULO :  12
+   PLUS :  12
+   SEMICOLON :  12
+   RPAR :  12
+   COMMA :  12
+
+
+state 39:
+   E =>  E PLUS F #  /  { COMMA, RPAR, MINUS, PLUS, SEMICOLON }
+   F =>  F # MODULO G  /  { COMMA, RPAR, MINUS, PLUS, MODULO, DIVIDES, TIMES, SEMICOLON }
+   F =>  F # DIVIDES G  /  { COMMA, RPAR, MINUS, PLUS, MODULO, DIVIDES, TIMES, SEMICOLON }
+   F =>  F # TIMES G  /  { COMMA, RPAR, MINUS, PLUS, MODULO, DIVIDES, TIMES, SEMICOLON }
+
+Shifts:
+   TIMES :  21
+   DIVIDES :  20
+   MODULO :  19
+
+Reductions:
+   SEMICOLON :  9
+   PLUS :  9
+   MINUS :  9
+   RPAR :  9
+   COMMA :  9
+
+
+state 40:
+   E =>  E MINUS F #  /  { COMMA, RPAR, MINUS, PLUS, SEMICOLON }
+   F =>  F # MODULO G  /  { COMMA, RPAR, MINUS, PLUS, MODULO, DIVIDES, TIMES, SEMICOLON }
+   F =>  F # DIVIDES G  /  { COMMA, RPAR, MINUS, PLUS, MODULO, DIVIDES, TIMES, SEMICOLON }
+   F =>  F # TIMES G  /  { COMMA, RPAR, MINUS, PLUS, MODULO, DIVIDES, TIMES, SEMICOLON }
+
+Shifts:
+   TIMES :  21
+   DIVIDES :  20
+   MODULO :  19
+
+Reductions:
+   SEMICOLON :  10
+   PLUS :  10
+   MINUS :  10
+   RPAR :  10
+   COMMA :  10
+
+
+state 41:
+   E =>  E # PLUS F  /  { COMMA, MINUS, PLUS, RPAR }
+   Arguments =>  E #  /  { COMMA, RPAR }
+   E =>  E # MINUS F  /  { COMMA, MINUS, PLUS, RPAR }
+
+Shifts:
+   MINUS :  23
+   PLUS :  22
+
+Reductions:
+   RPAR :  24
+   COMMA :  24
+
+
+state 42:
+   Arguments =>  Arguments # COMMA E  /  { COMMA, RPAR }
+   H =>  IDENT LPAR Arguments # RPAR  /  { COMMA, RPAR, SEMICOLON, MINUS, TIMES, DIVIDES, PLUS, FACTORIAL, MODULO }
+
+Shifts:
+   RPAR :  45
+   COMMA :  44
+
+
+state 43:
+   E =>  E # PLUS F  /  { MINUS, PLUS, SEMICOLON }
+   E =>  E # MINUS F  /  { MINUS, PLUS, SEMICOLON }
+   Command =>  IDENT ASSIGN E # SEMICOLON  /  { LPAR, DOUBLE, E, Show, H, IDENT, _recover_, Command, PLUS, G, F, Quit, Debug, MINUS, Nodebug, EOF }
+
+Shifts:
+   SEMICOLON :  46
+   MINUS :  23
+   PLUS :  22
+
+
+state 44:
+   Arguments =>  Arguments COMMA # E  /  { COMMA, RPAR }
+
+Shifts:
+   MINUS :  12
+   PLUS :  6
+   E :  47
+   H :  16
+   LPAR :  3
+   IDENT :  17
+   F :  4
+   DOUBLE :  2
+   G :  7
+
+
+state 45:
+   H =>  IDENT LPAR Arguments RPAR #  /  { COMMA, RPAR, SEMICOLON, MINUS, TIMES, DIVIDES, PLUS, FACTORIAL, MODULO }
+
+Reductions:
+   MODULO :  23
+   FACTORIAL :  23
+   PLUS :  23
+   DIVIDES :  23
+   TIMES :  23
+   MINUS :  23
+   SEMICOLON :  23
+   RPAR :  23
+   COMMA :  23
+
+
+state 46:
+   Command =>  IDENT ASSIGN E SEMICOLON #  /  { LPAR, DOUBLE, E, Show, H, IDENT, _recover_, Command, PLUS, G, F, Quit, Debug, MINUS, Nodebug, EOF }
+
+Reductions:
+   EOF :  3
+   Nodebug :  3
+   LPAR :  3
+   DOUBLE :  3
+   E :  3
+   Show :  3
+   MINUS :  3
+   Debug :  3
+   _recover_ :  3
+   IDENT :  3
+   H :  3
+   Command :  3
+   PLUS :  3
+   G :  3
+   F :  3
+   Quit :  3
+
+
+state 47:
+   E =>  E # PLUS F  /  { COMMA, MINUS, PLUS, RPAR }
+   E =>  E # MINUS F  /  { COMMA, MINUS, PLUS, RPAR }
+   Arguments =>  Arguments COMMA E #  /  { COMMA, RPAR }
+
+Shifts:
+   MINUS :  23
+   PLUS :  22
+
+Reductions:
+   RPAR :  25
+   COMMA :  25
+
+
+
+
+note that there are warnings
+
+symbol definition will be put in ./symbol.h and ./symbol.cpp
+
+opening file /home/nivelle/programs/maphoon2024/idee.x
+parser definition will be put in ./parser.h and ./parser.cpp
+
