@@ -13,4 +13,4 @@ Makefile
 parsing/parser.*
 parsing/location.h
 parsing/symbol.*
-
+./parser
