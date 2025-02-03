@@ -672,16 +672,16 @@ const std::vector< std::pair< char, size_t >> parsing::parser::reductioninfo =
 
 const parsing::parser::statesymbol::map< size_t > parsing::parser::shifts =
 {
-   { { 37, parsing::sym_LPAR }, 30 }, { { 34, parsing::sym_COMMA }, 36 }, { { 30, parsing::sym_type }, 33 }, { { 29, parsing::sym_IDENTIFIER }, 31 }, { { 27, parsing::sym_LPAR }, 30 },
-   { { 29, parsing::sym_term }, 32 }, { { 22, parsing::sym_IDENTIFIER }, 14 }, { { 22, parsing::sym_identifier_list }, 15 }, { { 36, parsing::sym_IDENTIFIER }, 25 }, { { 22, parsing::sym_struct_declaration_list }, 28 },
-   { { 34, parsing::sym_RPAR }, 35 }, { { 21, parsing::sym_IDENTIFIER }, 25 }, { { 30, parsing::sym_func }, 26 }, { { 21, parsing::sym_func }, 26 }, { { 12, parsing::sym_arg_list }, 18 },
-   { { 13, parsing::sym_struct_declaration_list }, 19 }, { { 36, parsing::sym_type }, 37 }, { { 10, parsing::sym_ASSIGN }, 13 }, { { 6, parsing::sym_IDENTIFIER }, 10 }, { { 1, parsing::sym_struct_specifier }, 2 },
-   { { 3, parsing::sym_IDENTIFIER }, 8 }, { { 1, parsing::sym_def_specifier }, 4 }, { { 1, parsing::sym__recover_ }, 5 }, { { 23, parsing::sym_ASSIGN }, 29 }, { { 1, parsing::sym_STRUCT }, 6 },
-   { { 30, parsing::sym_IDENTIFIER }, 25 }, { { 18, parsing::sym_RPAR }, 23 }, { { 36, parsing::sym_func }, 26 }, { { 1, parsing::sym_DEF }, 3 }, { { 5, parsing::sym_SEMICOLON }, 9 },
-   { { 12, parsing::sym_identifier_list }, 15 }, { { 8, parsing::sym_LPAR }, 12 }, { { 30, parsing::sym_type_list }, 34 }, { { 20, parsing::sym_identifier_list }, 24 }, { { 0, parsing::sym_Session }, 1 },
-   { { 22, parsing::sym_struct_declaration }, 16 }, { { 7, parsing::sym_SEMICOLON }, 11 }, { { 15, parsing::sym_COLON }, 21 }, { { 12, parsing::sym_struct_declaration_list }, 17 }, { { 21, parsing::sym_type }, 27 },
-   { { 12, parsing::sym_struct_declaration }, 16 }, { { 14, parsing::sym_COMMA }, 20 }, { { 12, parsing::sym_IDENTIFIER }, 14 }, { { 13, parsing::sym_struct_declaration }, 16 }, { { 13, parsing::sym_identifier_list }, 15 },
-   { { 33, parsing::sym_LPAR }, 30 }, { { 13, parsing::sym_IDENTIFIER }, 14 }, { { 16, parsing::sym_COMMA }, 22 }, { { 1, parsing::sym_Statement }, 7 }, { { 20, parsing::sym_IDENTIFIER }, 14 }
+   { { 36, parsing::sym_IDENTIFIER }, 25 }, { { 36, parsing::sym_func }, 26 }, { { 36, parsing::sym_type }, 37 }, { { 34, parsing::sym_COMMA }, 36 }, { { 30, parsing::sym_IDENTIFIER }, 25 },
+   { { 30, parsing::sym_type }, 33 }, { { 30, parsing::sym_type_list }, 34 }, { { 29, parsing::sym_IDENTIFIER }, 31 }, { { 23, parsing::sym_ASSIGN }, 29 }, { { 30, parsing::sym_func }, 26 },
+   { { 21, parsing::sym_func }, 26 }, { { 10, parsing::sym_ASSIGN }, 13 }, { { 15, parsing::sym_COLON }, 21 }, { { 5, parsing::sym_SEMICOLON }, 9 }, { { 22, parsing::sym_struct_declaration }, 16 },
+   { { 0, parsing::sym_Session }, 1 }, { { 27, parsing::sym_LPAR }, 30 }, { { 3, parsing::sym_IDENTIFIER }, 8 }, { { 8, parsing::sym_LPAR }, 12 }, { { 33, parsing::sym_LPAR }, 30 },
+   { { 7, parsing::sym_SEMICOLON }, 11 }, { { 16, parsing::sym_COMMA }, 22 }, { { 22, parsing::sym_struct_declaration_list }, 28 }, { { 6, parsing::sym_IDENTIFIER }, 10 }, { { 1, parsing::sym_struct_specifier }, 2 },
+   { { 21, parsing::sym_IDENTIFIER }, 25 }, { { 13, parsing::sym_struct_declaration_list }, 19 }, { { 12, parsing::sym_struct_declaration }, 16 }, { { 1, parsing::sym_DEF }, 3 }, { { 14, parsing::sym_COMMA }, 20 },
+   { { 1, parsing::sym__recover_ }, 5 }, { { 18, parsing::sym_RPAR }, 23 }, { { 34, parsing::sym_RPAR }, 35 }, { { 12, parsing::sym_struct_declaration_list }, 17 }, { { 20, parsing::sym_IDENTIFIER }, 14 },
+   { { 29, parsing::sym_term }, 32 }, { { 1, parsing::sym_STRUCT }, 6 }, { { 1, parsing::sym_def_specifier }, 4 }, { { 22, parsing::sym_IDENTIFIER }, 14 }, { { 20, parsing::sym_identifier_list }, 24 },
+   { { 1, parsing::sym_Statement }, 7 }, { { 22, parsing::sym_identifier_list }, 15 }, { { 12, parsing::sym_arg_list }, 18 }, { { 12, parsing::sym_identifier_list }, 15 }, { { 12, parsing::sym_IDENTIFIER }, 14 },
+   { { 13, parsing::sym_struct_declaration }, 16 }, { { 13, parsing::sym_identifier_list }, 15 }, { { 13, parsing::sym_IDENTIFIER }, 14 }, { { 37, parsing::sym_LPAR }, 30 }, { { 21, parsing::sym_type }, 27 }
 };
 
 const parsing::parser::statesymbol::map< std::vector< size_t >> parsing::parser::reductions =

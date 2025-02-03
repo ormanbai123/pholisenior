@@ -17,3 +17,6 @@ struct Seq :=
 struct Seq := 
    zero, one, two, three, four : O(T,O(T))(O, O), 
    succ : T;
+
+def gen( s: Seq ) (x : O) :=
+   [ P : T(O) ] { strict(P) } -> isclosed(s, P) -> P (x).
