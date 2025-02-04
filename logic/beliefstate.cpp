@@ -2,6 +2,9 @@
 #include "beliefstate.h"
 #include "termoperators.h"
 
+#include "pretty.h"
+#include <assert.h>
+
 logic::exact logic::beliefstate::append( belief&& bl )
 {
 
@@ -124,20 +127,167 @@ namespace
       }
       out << " }";
    }
+
 }
+
 
 void logic::beliefstate::print( std::ostream& out ) const
 {
+   pretty::uniquenamestack names;
+   
    out << "Beliefstate:\n"; 
-   for( size_t i = 0; i != vect. size( ); ++ i )
-      out << "   " << exact(i) << " : " << vect[i]. first << "\n";
+   for( size_t i = 0; i != size(); ++ i ) {
+      out << "   " << exact(i) << " : "; 
+
+      const auto& belif = at(exact(i)).first;
+
+      switch( belif.sel( ) )
+      {
+      case bel_empty:
+            out << "empty belief (should not be used)";
+            break;
+
+      case bel_struct: {
+         out << belif.name( ) << " := ";
+
+         auto& strct_def = belif.view_struct().def(); 
+
+         out << "struct(";
+         for( auto p = strct_def.begin(); p != strct_def.end(); ++ p )
+         {
+            if( p == strct_def.begin()) 
+               out << " ";
+            else
+               out << ", ";
+            out << (*p).name << " : ";
+            pretty::print(out, *this, (*p).tp, {});  
+         }
+         out << " )"; 
+         break;
+      }
+
+      case bel_decl: {
+         out << "decl " << belif.name( ) << " : " << belif.view_decl( ). tp( );
+         break;
+      }
+      case bel_def:
+         {
+            auto d = belif.view_def( );
+            out << belif.name( ) << " := ";
+            pretty::print( out, *this, names, d.val(), {0,0} ); 
+         }
+         break;
+
+      case bel_form: {
+         out << "form " << belif.name( ) << " : "; 
+         
+         auto f = belif.view_form();
+         pretty::print(out, *this, names, f.form(), {});
+         
+         break;
+      }
+
+      case bel_fld:
+         {
+            auto f = belif.view_field( );
+            out << belif.name( ) << " : field at offset " << f. offset( );
+            out << " in ";
+            exact ex = f.sdef();
+
+            if (contains(ex))
+            { 
+               const auto& id = at(ex).first.name();
+               if( id.size() == 1 && !names.issafe(id.at(0)) )
+                  out << "::";
+               out << id;
+            }
+            else
+               out << ex;
+         }
+         break;
+
+      case bel_constr:
+         {
+            auto c = belif.view_constr( );
+            out << belif.name( ) << " : " << "constructor of ";
+            
+            auto& ex = c.tp();
+            if (contains(ex))
+            { 
+               auto bel = at(ex).first;
+               // Print the type of constructor
+               switch(bel.sel()) {
+                  case bel_struct: {
+                     const auto& strct_def = bel.view_struct().def();
+                     out << "(";
+
+                     for (auto itr = strct_def.repr.begin(); itr != strct_def.repr.end(); itr++) {
+                        if (itr == strct_def.repr.begin())
+                           out << " ";
+                        else
+                           out << ", ";
+
+                        pretty::print(out, *this, (*itr).tp, {});
+                     }
+
+                     out << " )";
+                     break;
+                  } 
+
+                  default: 
+                  // (TODO) Handle other cases if they even exist???
+                  {
+                     throw std::runtime_error("Something went wrong!");
+                  }
+               }
+            }
+            else
+               out << ex;
+
+         }
+         break;
+      default:
+         {
+            out << "belief has selector: " << belif.sel( ) << "\n";
+            throw std::runtime_error( "wrong selector for belief" );
+         }
+      }
+
+      out << "\n";
+   }
    out << "\n";
 
    out << "Functions:\n";
    for( const auto& f : functions )
    {
       out << "   " << f. first << " :   ";
-      ::print( out, f. second );
+      
+      assert(f.second.size() > 0);
+      switch (at(f.second[0]).first.sel())
+      {
+      case bel_def: {
+         out << "{";
+         for(auto itr = f.second.begin(); itr != f.second.end(); itr++) {
+            auto& b = at(*itr).first;
+            auto def = b.view_def();
+
+            if (itr == f.second.begin())
+               out << " ";
+            else
+               out << ", ";
+
+            pretty::print(out, *this, def.tp(), {});
+         }
+         out << " }";
+         break;
+      }
+      default:
+         // (TODO)
+         // Finish me
+         ::print(out, f.second);
+         break;
+      }
+
       out << '\n';
    }
    out << '\n';
@@ -146,11 +296,30 @@ void logic::beliefstate::print( std::ostream& out ) const
    for( const auto& sdef : structdefs )
    {
       out << "   " << sdef. first << " :   ";
-      ::print( out, sdef. second ); 
+      
+      for(const auto& el : sdef.second) {
+         auto& bel = at(el).first;
+         auto& strct_def = bel.view_struct().def();
+         
+         out << "struct(";
+         for( auto p = strct_def.begin(); p != strct_def.end(); ++ p )
+         {
+            if( p == strct_def.begin()) 
+               out << " ";
+            else
+               out << ", ";
+            out << (*p).name << " : ";
+            pretty::print(out, *this, (*p).tp, {});  
+         }
+         out << " )"; 
+      }
+      
       out << '\n';
    }
    out << '\n';
 
+   // (TODO)
+   // Finish me
    out << "Formulas:\n";
    for( const auto& f : formulas )
    {
@@ -159,6 +328,7 @@ void logic::beliefstate::print( std::ostream& out ) const
       out << '\n';
    }
    out << '\n';
+
 }
 
 
