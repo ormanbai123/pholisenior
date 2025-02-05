@@ -11,9 +11,9 @@ parsing::tokenizer::buildclassifier()
 
     classifier<char, symbolval> cls(symbolval::sym_SCANERROR);   
 
-   auto letter = range('a', 'z') | range('A', 'Z');
+    auto letter = range('a', 'z') | range('A', 'Z');
     auto digit = range('0', '9');
-    cls.insert((just('_') | letter) * (just('_') | letter | digit).star(), symbolval::sym_IDENTIFIER);
+    cls.insert( ( just('_') | letter | digit ).plus(), symbolval::sym_IDENTIFIER );
 
    // Single-double char tokens
    cls.insert(just(']'), parsing::symbolval::sym_RBRACKET);

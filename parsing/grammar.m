@@ -2,25 +2,25 @@
 
 %symbol Session
 %symbol{} Statement Expr
-%symbol{} term def_specifier arg_list
-%symbol{} struct_specifier struct_declaration_list struct_declaration
+
+%symbol{} term def_specifier
+%symbol{} struct_specifier struct_declaration_list
+%symbol{} args_seq args
 %symbol{} type type_list func
 
-%symbol{ std::string } SCANERROR
+%symbol{} IDENTIFIER
+%symbol{} identifier_list identifiers_colon_type
+%symbol{} STRUCT DEF FRM
 
 %symbol{} EOF FILEBAD WHITESPACE COMMENT EMPTY
 %symbol{} LPAR RPAR LBRACE RBRACE LBRACKET RBRACKET 
-%symbol{} EQ LT GT LT_EQ GT_EQ ASSIGN  
+%symbol{} EQ LT GT LT_EQ GT_EQ ASSIGN
+%symbol{} AND OR IMPLY
 %symbol{} COLON SEMICOLON COMMA DOT 
 
 %symbol{} FORALL EXISTS
 
-%symbol{} AND OR IMPLY
-
-%symbol{} IDENTIFIER
-%symbol{} identifier_list
-%symbol{} STRUCT DEF FRM
-
+%symbol{ std::string } SCANERROR
 //%symbol{} E F G Q PLUS MUL MINUS NUM
 
 %symbolcode_h { #include "location.h" }
@@ -39,6 +39,9 @@
 %source { tok.read(); }
 
 %rules 
+
+//-------------------------common--------------------------------
+
 Session => 
     | Session Statement SEMICOLON
     | Session _recover_ SEMICOLON
@@ -51,20 +54,11 @@ Statement => struct_specifier
 
 term => IDENTIFIER;
 
-//-----------------------structs---------------------------------
-
-struct_specifier => STRUCT IDENTIFIER ASSIGN struct_declaration_list {std::cout << "STRUCT!\n";}
-                  ; 
-
-struct_declaration_list => struct_declaration
-                         | struct_declaration COMMA struct_declaration_list 
-                         ;
 identifier_list => IDENTIFIER
 				 | IDENTIFIER COMMA identifier_list
 				 ;
 
-struct_declaration => identifier_list COLON type
-                    ; 
+identifiers_colon_type => identifier_list COLON type;
 
 type => IDENTIFIER
       | func
@@ -77,15 +71,29 @@ type_list => type
           | type_list COMMA type
           ;
 
+//-----------------------structs---------------------------------
+
+struct_specifier => STRUCT IDENTIFIER ASSIGN struct_declaration_list {std::cout << "STRUCT!\n";}
+                  ; 
+
+struct_declaration_list => identifiers_colon_type
+                         | identifiers_colon_type COMMA struct_declaration_list 
+                         ;
+
+
 //-----------------------defs---------------------------------
 
-def_specifier => DEF IDENTIFIER LPAR arg_list RPAR ASSIGN term {std::cout << "Definition!\n";}
-               ;
 
-arg_list => 
-          | struct_declaration_list
-          ;
+def_specifier => DEF IDENTIFIER args_seq ASSIGN {std::cout << "Definition!\n";};		  
+args_seq => args_seq args
+		  | args
+		  ;
 
+args => LPAR identifiers_colon_type RPAR
+	  | LPAR RPAR
+	  ;
+
+//-----------------------defs---------------------------------
 
 /* 
 F => F MUL G

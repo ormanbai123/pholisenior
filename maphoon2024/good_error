@@ -1,0 +1,143 @@
+
+g++ -c -Wreturn-type -pedantic -pedantic-errors -Wundef -std=c++17 tablecodebuilder.cpp -o  tablecodebuilder.o
+In file included from /usr/include/c++/7/bits/hashtable.h:35:0,
+                 from /usr/include/c++/7/unordered_set:47,
+                 from symbol.h:10,
+                 from tablecodebuilder.h:4,
+                 from tablecodebuilder.cpp:2:
+/usr/include/c++/7/bits/hashtable_policy.h: In instantiation of ‘struct std::__detail::__is_noexcept_hash<symbol, std::hash<symbol> >’:
+/usr/include/c++/7/type_traits:143:12:   required from ‘struct std::__and_<std::__is_fast_hash<std::hash<symbol> >, std::__detail::__is_noexcept_hash<symbol, std::hash<symbol> > >’
+/usr/include/c++/7/type_traits:154:31:   required from ‘struct std::__not_<std::__and_<std::__is_fast_hash<std::hash<symbol> >, std::__detail::__is_noexcept_hash<symbol, std::hash<symbol> > > >’
+/usr/include/c++/7/bits/stl_pair.h:215:11:   recursively required from ‘struct std::pair<long unsigned int, std::unordered_set<symbol> >’
+/usr/include/c++/7/bits/stl_pair.h:215:11:   required from ‘struct std::pair<const symbol, std::pair<long unsigned int, std::unordered_set<symbol> > >’
+/usr/include/c++/7/ext/aligned_buffer.h:85:34:   required from ‘struct __gnu_cxx::__aligned_buffer<std::pair<const symbol, std::pair<long unsigned int, std::unordered_set<symbol> > > >’
+/usr/include/c++/7/bits/hashtable_policy.h:248:43:   required from ‘struct std::__detail::_Hash_node_value_base<std::pair<const symbol, std::pair<long unsigned int, std::unordered_set<symbol> > > >’
+/usr/include/c++/7/bits/hashtable_policy.h:279:12:   required from ‘struct std::__detail::_Hash_node<std::pair<const symbol, std::pair<long unsigned int, std::unordered_set<symbol> > >, true>’
+/usr/include/c++/7/bits/hashtable_policy.h:2007:60:   required from ‘struct std::__detail::_Hashtable_alloc<std::allocator<std::__detail::_Hash_node<std::pair<const symbol, std::pair<long unsigned int, std::unordered_set<symbol> > >, true> > >’
+/usr/include/c++/7/bits/hashtable.h:173:11:   required from ‘class std::_Hashtable<symbol, std::pair<const symbol, std::pair<long unsigned int, std::unordered_set<symbol> > >, std::allocator<std::pair<const symbol, std::pair<long unsigned int, std::unordered_set<symbol> > > >, std::__detail::_Select1st, symbol::equal_to, symbol::hash, std::__detail::_Mod_range_hashing, std::__detail::_Default_ranged_hash, std::__detail::_Prime_rehash_policy, std::__detail::_Hashtable_traits<true, false, true> >’
+/usr/include/c++/7/bits/unordered_map.h:104:18:   required from ‘class std::unordered_map<symbol, std::pair<long unsigned int, std::unordered_set<symbol> >, symbol::hash, symbol::equal_to, std::allocator<std::pair<const symbol, std::pair<long unsigned int, std::unordered_set<symbol> > > > >’
+tablecodebuilder.h:44:67:   required from here
+/usr/include/c++/7/bits/hashtable_policy.h:87:34: error: no match for call to ‘(const std::hash<symbol>) (const symbol&)’
+  noexcept(declval<const _Hash&>()(declval<const _Key&>()))>
+           ~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~
+In file included from /usr/include/c++/7/bits/move.h:54:0,
+                 from /usr/include/c++/7/bits/stl_pair.h:59,
+                 from /usr/include/c++/7/bits/stl_algobase.h:64,
+                 from /usr/include/c++/7/bits/char_traits.h:39,
+                 from /usr/include/c++/7/string:40,
+                 from symbol.h:8,
+                 from tablecodebuilder.h:4,
+                 from tablecodebuilder.cpp:2:
+/usr/include/c++/7/type_traits: In instantiation of ‘struct std::__not_<std::__and_<std::__is_fast_hash<std::hash<symbol> >, std::__detail::__is_noexcept_hash<symbol, std::hash<symbol> > > >’:
+/usr/include/c++/7/bits/stl_pair.h:215:11:   recursively required from ‘struct std::pair<long unsigned int, std::unordered_set<symbol> >’
+/usr/include/c++/7/bits/stl_pair.h:215:11:   required from ‘struct std::pair<const symbol, std::pair<long unsigned int, std::unordered_set<symbol> > >’
+/usr/include/c++/7/ext/aligned_buffer.h:85:34:   required from ‘struct __gnu_cxx::__aligned_buffer<std::pair<const symbol, std::pair<long unsigned int, std::unordered_set<symbol> > > >’
+/usr/include/c++/7/bits/hashtable_policy.h:248:43:   required from ‘struct std::__detail::_Hash_node_value_base<std::pair<const symbol, std::pair<long unsigned int, std::unordered_set<symbol> > > >’
+/usr/include/c++/7/bits/hashtable_policy.h:279:12:   required from ‘struct std::__detail::_Hash_node<std::pair<const symbol, std::pair<long unsigned int, std::unordered_set<symbol> > >, true>’
+/usr/include/c++/7/bits/hashtable_policy.h:2007:60:   required from ‘struct std::__detail::_Hashtable_alloc<std::allocator<std::__detail::_Hash_node<std::pair<const symbol, std::pair<long unsigned int, std::unordered_set<symbol> > >, true> > >’
+/usr/include/c++/7/bits/hashtable.h:173:11:   required from ‘class std::_Hashtable<symbol, std::pair<const symbol, std::pair<long unsigned int, std::unordered_set<symbol> > >, std::allocator<std::pair<const symbol, std::pair<long unsigned int, std::unordered_set<symbol> > > >, std::__detail::_Select1st, symbol::equal_to, symbol::hash, std::__detail::_Mod_range_hashing, std::__detail::_Default_ranged_hash, std::__detail::_Prime_rehash_policy, std::__detail::_Hashtable_traits<true, false, true> >’
+/usr/include/c++/7/bits/unordered_map.h:104:18:   required from ‘class std::unordered_map<symbol, std::pair<long unsigned int, std::unordered_set<symbol> >, symbol::hash, symbol::equal_to, std::allocator<std::pair<const symbol, std::pair<long unsigned int, std::unordered_set<symbol> > > > >’
+tablecodebuilder.h:44:67:   required from here
+/usr/include/c++/7/type_traits:154:31: error: ‘value’ is not a member of ‘std::__and_<std::__is_fast_hash<std::hash<symbol> >, std::__detail::__is_noexcept_hash<symbol, std::hash<symbol> > >’
+     : public __bool_constant<!bool(_Pp::value)>
+                               ^~~~~~~~~~~~~~~~
+In file included from /usr/include/c++/7/unordered_set:48:0,
+                 from symbol.h:10,
+                 from tablecodebuilder.h:4,
+                 from tablecodebuilder.cpp:2:
+/usr/include/c++/7/bits/unordered_set.h: In instantiation of ‘class std::unordered_set<symbol>’:
+/usr/include/c++/7/bits/stl_pair.h:215:11:   recursively required from ‘struct std::pair<long unsigned int, std::unordered_set<symbol> >’
+/usr/include/c++/7/bits/stl_pair.h:215:11:   required from ‘struct std::pair<const symbol, std::pair<long unsigned int, std::unordered_set<symbol> > >’
+/usr/include/c++/7/ext/aligned_buffer.h:85:34:   required from ‘struct __gnu_cxx::__aligned_buffer<std::pair<const symbol, std::pair<long unsigned int, std::unordered_set<symbol> > > >’
+/usr/include/c++/7/bits/hashtable_policy.h:248:43:   required from ‘struct std::__detail::_Hash_node_value_base<std::pair<const symbol, std::pair<long unsigned int, std::unordered_set<symbol> > > >’
+/usr/include/c++/7/bits/hashtable_policy.h:279:12:   required from ‘struct std::__detail::_Hash_node<std::pair<const symbol, std::pair<long unsigned int, std::unordered_set<symbol> > >, true>’
+/usr/include/c++/7/bits/hashtable_policy.h:2007:60:   required from ‘struct std::__detail::_Hashtable_alloc<std::allocator<std::__detail::_Hash_node<std::pair<const symbol, std::pair<long unsigned int, std::unordered_set<symbol> > >, true> > >’
+/usr/include/c++/7/bits/hashtable.h:173:11:   required from ‘class std::_Hashtable<symbol, std::pair<const symbol, std::pair<long unsigned int, std::unordered_set<symbol> > >, std::allocator<std::pair<const symbol, std::pair<long unsigned int, std::unordered_set<symbol> > > >, std::__detail::_Select1st, symbol::equal_to, symbol::hash, std::__detail::_Mod_range_hashing, std::__detail::_Default_ranged_hash, std::__detail::_Prime_rehash_policy, std::__detail::_Hashtable_traits<true, false, true> >’
+/usr/include/c++/7/bits/unordered_map.h:104:18:   required from ‘class std::unordered_map<symbol, std::pair<long unsigned int, std::unordered_set<symbol> >, symbol::hash, symbol::equal_to, std::allocator<std::pair<const symbol, std::pair<long unsigned int, std::unordered_set<symbol> > > > >’
+tablecodebuilder.h:44:67:   required from here
+/usr/include/c++/7/bits/unordered_set.h:98:63: error: ‘value’ is not a member of ‘std::__not_<std::__and_<std::__is_fast_hash<std::hash<symbol> >, std::__detail::__is_noexcept_hash<symbol, std::hash<symbol> > > >’
+       typedef __uset_hashtable<_Value, _Hash, _Pred, _Alloc>  _Hashtable;
+                                                               ^~~~~~~~~~
+/usr/include/c++/7/bits/unordered_set.h:105:45: error: ‘value’ is not a member of ‘std::__not_<std::__and_<std::__is_fast_hash<std::hash<symbol> >, std::__detail::__is_noexcept_hash<symbol, std::hash<symbol> > > >’
+       typedef typename _Hashtable::key_type key_type;
+                                             ^~~~~~~~
+/usr/include/c++/7/bits/unordered_set.h:106:47: error: ‘value’ is not a member of ‘std::__not_<std::__and_<std::__is_fast_hash<std::hash<symbol> >, std::__detail::__is_noexcept_hash<symbol, std::hash<symbol> > > >’
+       typedef typename _Hashtable::value_type value_type;
+                                               ^~~~~~~~~~
+/usr/include/c++/7/bits/unordered_set.h:107:43: error: ‘value’ is not a member of ‘std::__not_<std::__and_<std::__is_fast_hash<std::hash<symbol> >, std::__detail::__is_noexcept_hash<symbol, std::hash<symbol> > > >’
+       typedef typename _Hashtable::hasher hasher;
+                                           ^~~~~~
+/usr/include/c++/7/bits/unordered_set.h:108:46: error: ‘value’ is not a member of ‘std::__not_<std::__and_<std::__is_fast_hash<std::hash<symbol> >, std::__detail::__is_noexcept_hash<symbol, std::hash<symbol> > > >’
+       typedef typename _Hashtable::key_equal key_equal;
+                                              ^~~~~~~~~
+/usr/include/c++/7/bits/unordered_set.h:109:51: error: ‘value’ is not a member of ‘std::__not_<std::__and_<std::__is_fast_hash<std::hash<symbol> >, std::__detail::__is_noexcept_hash<symbol, std::hash<symbol> > > >’
+       typedef typename _Hashtable::allocator_type allocator_type;
+                                                   ^~~~~~~~~~~~~~
+/usr/include/c++/7/bits/unordered_set.h:114:45: error: ‘value’ is not a member of ‘std::__not_<std::__and_<std::__is_fast_hash<std::hash<symbol> >, std::__detail::__is_noexcept_hash<symbol, std::hash<symbol> > > >’
+       typedef typename _Hashtable::pointer  pointer;
+                                             ^~~~~~~
+/usr/include/c++/7/bits/unordered_set.h:115:50: error: ‘value’ is not a member of ‘std::__not_<std::__and_<std::__is_fast_hash<std::hash<symbol> >, std::__detail::__is_noexcept_hash<symbol, std::hash<symbol> > > >’
+       typedef typename _Hashtable::const_pointer const_pointer;
+                                                  ^~~~~~~~~~~~~
+/usr/include/c++/7/bits/unordered_set.h:116:47: error: ‘value’ is not a member of ‘std::__not_<std::__and_<std::__is_fast_hash<std::hash<symbol> >, std::__detail::__is_noexcept_hash<symbol, std::hash<symbol> > > >’
+       typedef typename _Hashtable::reference  reference;
+                                               ^~~~~~~~~
+/usr/include/c++/7/bits/unordered_set.h:117:52: error: ‘value’ is not a member of ‘std::__not_<std::__and_<std::__is_fast_hash<std::hash<symbol> >, std::__detail::__is_noexcept_hash<symbol, std::hash<symbol> > > >’
+       typedef typename _Hashtable::const_reference const_reference;
+                                                    ^~~~~~~~~~~~~~~
+/usr/include/c++/7/bits/unordered_set.h:118:46: error: ‘value’ is not a member of ‘std::__not_<std::__and_<std::__is_fast_hash<std::hash<symbol> >, std::__detail::__is_noexcept_hash<symbol, std::hash<symbol> > > >’
+       typedef typename _Hashtable::iterator  iterator;
+                                              ^~~~~~~~
+/usr/include/c++/7/bits/unordered_set.h:119:51: error: ‘value’ is not a member of ‘std::__not_<std::__and_<std::__is_fast_hash<std::hash<symbol> >, std::__detail::__is_noexcept_hash<symbol, std::hash<symbol> > > >’
+       typedef typename _Hashtable::const_iterator const_iterator;
+                                                   ^~~~~~~~~~~~~~
+/usr/include/c++/7/bits/unordered_set.h:120:51: error: ‘value’ is not a member of ‘std::__not_<std::__and_<std::__is_fast_hash<std::hash<symbol> >, std::__detail::__is_noexcept_hash<symbol, std::hash<symbol> > > >’
+       typedef typename _Hashtable::local_iterator local_iterator;
+                                                   ^~~~~~~~~~~~~~
+/usr/include/c++/7/bits/unordered_set.h:121:57: error: ‘value’ is not a member of ‘std::__not_<std::__and_<std::__is_fast_hash<std::hash<symbol> >, std::__detail::__is_noexcept_hash<symbol, std::hash<symbol> > > >’
+       typedef typename _Hashtable::const_local_iterator const_local_iterator;
+                                                         ^~~~~~~~~~~~~~~~~~~~
+/usr/include/c++/7/bits/unordered_set.h:122:47: error: ‘value’ is not a member of ‘std::__not_<std::__and_<std::__is_fast_hash<std::hash<symbol> >, std::__detail::__is_noexcept_hash<symbol, std::hash<symbol> > > >’
+       typedef typename _Hashtable::size_type  size_type;
+                                               ^~~~~~~~~
+/usr/include/c++/7/bits/unordered_set.h:123:52: error: ‘value’ is not a member of ‘std::__not_<std::__and_<std::__is_fast_hash<std::hash<symbol> >, std::__detail::__is_noexcept_hash<symbol, std::hash<symbol> > > >’
+       typedef typename _Hashtable::difference_type difference_type;
+                                                    ^~~~~~~~~~~~~~~
+/usr/include/c++/7/bits/unordered_set.h:127:55: error: ‘value’ is not a member of ‘std::__not_<std::__and_<std::__is_fast_hash<std::hash<symbol> >, std::__detail::__is_noexcept_hash<symbol, std::hash<symbol> > > >’
+       using node_type = typename _Hashtable::node_type;
+                                                       ^
+/usr/include/c++/7/bits/unordered_set.h:128:73: error: ‘value’ is not a member of ‘std::__not_<std::__and_<std::__is_fast_hash<std::hash<symbol> >, std::__detail::__is_noexcept_hash<symbol, std::hash<symbol> > > >’
+       using insert_return_type = typename _Hashtable::insert_return_type;
+                                                                         ^
+/usr/include/c++/7/bits/unordered_set.h:282:7: error: ‘value’ is not a member of ‘std::__not_<std::__and_<std::__is_fast_hash<std::hash<symbol> >, std::__detail::__is_noexcept_hash<symbol, std::hash<symbol> > > >’
+       operator=(initializer_list<value_type> __l)
+       ^~~~~~~~
+/usr/include/c++/7/bits/unordered_set.h:375:2: error: ‘value’ is not a member of ‘std::__not_<std::__and_<std::__is_fast_hash<std::hash<symbol> >, std::__detail::__is_noexcept_hash<symbol, std::hash<symbol> > > >’
+  emplace(_Args&&... __args)
+  ^~~~~~~
+/usr/include/c++/7/bits/unordered_set.h:419:7: error: ‘value’ is not a member of ‘std::__not_<std::__and_<std::__is_fast_hash<std::hash<symbol> >, std::__detail::__is_noexcept_hash<symbol, std::hash<symbol> > > >’
+       insert(const value_type& __x)
+       ^~~~~~
+/usr/include/c++/7/bits/unordered_set.h:423:7: error: ‘value’ is not a member of ‘std::__not_<std::__and_<std::__is_fast_hash<std::hash<symbol> >, std::__detail::__is_noexcept_hash<symbol, std::hash<symbol> > > >’
+       insert(value_type&& __x)
+       ^~~~~~
+/usr/include/c++/7/bits/unordered_set.h:478:7: error: ‘value’ is not a member of ‘std::__not_<std::__and_<std::__is_fast_hash<std::hash<symbol> >, std::__detail::__is_noexcept_hash<symbol, std::hash<symbol> > > >’
+       insert(initializer_list<value_type> __l)
+       ^~~~~~
+/usr/include/c++/7/bits/unordered_set.h:679:7: error: ‘value’ is not a member of ‘std::__not_<std::__and_<std::__is_fast_hash<std::hash<symbol> >, std::__detail::__is_noexcept_hash<symbol, std::hash<symbol> > > >’
+       equal_range(const key_type& __x)
+       ^~~~~~~~~~~
+/usr/include/c++/7/bits/unordered_set.h:683:7: error: ‘value’ is not a member of ‘std::__not_<std::__and_<std::__is_fast_hash<std::hash<symbol> >, std::__detail::__is_noexcept_hash<symbol, std::hash<symbol> > > >’
+       equal_range(const key_type& __x) const
+       ^~~~~~~~~~~
+Makefile:66: recipe for target 'tablecodebuilder.o' failed
+make: *** [tablecodebuilder.o] Error 1
+
+The cause of the error is this line:
+
+symbol::map< std::pair< size_t, std::unordered_set< symbol >>> startsymbols;
+      // Maps possible start symbols to pairs consisting of
+      // initial state, and their associated terminator sets.
+
+The default hash template std::hash< symbol > is not defined for symbol.
+

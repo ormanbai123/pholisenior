@@ -1,0 +1,220 @@
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=latex 2024.8.15)  17 SEP 2024 15:15
+entering extended mode
+ restricted \write18 enabled.
+ %&-line parsing enabled.
+**maphoon.tex
+(./maphoon.tex
+LaTeX2e <2023-11-01> patch level 1
+L3 programming layer <2024-01-22>
+(/usr/share/texlive/texmf-dist/tex/latex/base/article.cls
+Document Class: article 2023/05/17 v1.4n Standard LaTeX document class
+(/usr/share/texlive/texmf-dist/tex/latex/base/size10.clo
+File: size10.clo 2023/05/17 v1.4n Standard LaTeX file (size option)
+)
+\c@part=\count187
+\c@section=\count188
+\c@subsection=\count189
+\c@subsubsection=\count190
+\c@paragraph=\count191
+\c@subparagraph=\count192
+\c@figure=\count193
+\c@table=\count194
+\abovecaptionskip=\skip48
+\belowcaptionskip=\skip49
+\bibindent=\dimen140
+)
+(/usr/share/texlive/texmf-dist/tex/latex/l3backend/l3backend-dvips.def
+File: l3backend-dvips.def 2024-01-04 L3 backend support: dvips
+\l__pdf_internal_box=\box51
+\g__pdf_backend_object_int=\count195
+\l__pdf_backend_content_box=\box52
+\l__pdf_backend_model_box=\box53
+\g__pdf_backend_annotation_int=\count196
+\g__pdf_backend_link_int=\count197
+\g__pdf_backend_link_sf_int=\count198
+)
+(./maphoon.aux)
+\openout1 = `maphoon.aux'.
+
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 6.
+LaTeX Font Info:    ... okay on input line 6.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 6.
+LaTeX Font Info:    ... okay on input line 6.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 6.
+LaTeX Font Info:    ... okay on input line 6.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 6.
+LaTeX Font Info:    ... okay on input line 6.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 6.
+LaTeX Font Info:    ... okay on input line 6.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 6.
+LaTeX Font Info:    ... okay on input line 6.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 6.
+LaTeX Font Info:    ... okay on input line 6.
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <12> on input line 8.
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <8> on input line 8.
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <6> on input line 8.
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <9> on input line 13.
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <5> on input line 13.
+ [1
+
+]
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <7> on input line 63.
+
+Overfull \hbox (27.77722pt too wide) in paragraph at lines 78--85
+\OT1/cmr/m/n/10 ling and Shapiro [[]]) In Pro-log, it is pos-si-ble to de-clare
+ [][]\OT1/cmtt/m/n/10 op( '+', 'yfx', 200 ),
+ []
+
+[2] [3]
+Overfull \hbox (11.55455pt too wide) in paragraph at lines 252--268
+\OT1/cmr/m/n/10 have a [][]\OT1/cmtt/m/n/10 merge []\OT1/cmr/m/n/10 method, who
+se sig-na-ture must be [][]\OT1/cmtt/m/n/10 void merge( sourceinfo )[]\OT1/cmr/
+m/n/10 ,
+ []
+
+[4]
+Overfull \hbox (10.98993pt too wide) in paragraph at lines 287--296
+\OT1/cmr/m/n/10 name of the source in-for-ma-tion class. In ad-di-tion, [][]\OT
+1/cmtt/m/n/10 std::optional< sourceinfo >
+ []
+
+[5]
+Overfull \hbox (6.74693pt too wide) in paragraph at lines 372--372
+[]   \OT1/cmtt/m/n/10 %parameter { tokenizer } tok   // & will be added automat
+ically.[] 
+ []
+
+
+Overfull \hbox (11.99689pt too wide) in paragraph at lines 409--409
+[]   \OT1/cmtt/m/n/10 A => b ;  // Error, don't know which integer to use as at
+tribute.[] 
+ []
+
+[6]
+Overfull \hbox (17.24684pt too wide) in paragraph at lines 460--460
+[]      \OT1/cmtt/m/n/10 std::cout << "   --> assigning: " << id << " := " << e
+ << "\n";[] 
+ []
+
+[7] [8] [9]
+Overfull \hbox (43.49661pt too wide) in paragraph at lines 610--618
+[][]\OT1/cmtt/m/n/10 void print_range( Iter i0, Iter i1, char c0, char c1, std:
+:ostream& out );
+ []
+
+
+Overfull \hbox (17.24684pt too wide) in paragraph at lines 624--624
+[]   \OT1/cmtt/m/n/10 void print_attr( const std::set< char > & set, std::ostre
+am& out )[] 
+ []
+
+[10]
+Overfull \hbox (11.99689pt too wide) in paragraph at lines 667--667
+[]\OT1/cmtt/m/n/10 Formula  => Formula2 IMP Formula | Formula2 ;  // richt asso
+ciative.[] 
+ []
+
+
+Overfull \hbox (6.74693pt too wide) in paragraph at lines 667--667
+[]\OT1/cmtt/m/n/10 Formula2 => Formula2 OR Formula3 | Formula3 ;  // left assoc
+iative.[] 
+ []
+
+[11] [12]
+Overfull \hbox (22.4968pt too wide) in paragraph at lines 817--817
+[]      \OT1/cmtt/m/n/10 // std::cout << "Deciding between: " << s1 << " " << s
+2 << "\n";[] 
+ []
+
+[13] [14] [15]
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <14.4> on input line 992.
+
+Overfull \hbox (4.2406pt too wide) in paragraph at lines 1016--1022
+\OT1/cmr/m/n/10 files where the at-tribute types are de-fined, are in-cluded. U
+se [][]\OT1/cmtt/m/n/10 symbolcode_h[]\OT1/cmr/m/n/10 . 
+ []
+
+
+Overfull \hbox (12.90546pt too wide) in paragraph at lines 1034--1040
+\OT1/cmr/m/n/10 If ev-ery-thing goes well, Maphoon cre-ates a parser in files \
+OT1/cmr/bx/n/10 parser.h \OT1/cmr/m/n/10 and \OT1/cmr/bx/n/10 parser.cpp\OT1/cm
+r/m/n/10 .
+ []
+
+
+Overfull \hbox (12.94394pt too wide) in paragraph at lines 1034--1040
+\OT1/cmr/m/n/10 The parser is de-fined in a class [][]\OT1/cmtt/m/n/10 parser [
+]\OT1/cmr/m/n/10 in the names-pace spec-i-fied by [][]\OT1/cmtt/m/n/10 %parsers
+pace[]\OT1/cmr/m/n/10 .
+ []
+
+[16]
+Overfull \hbox (27.90715pt too wide) in paragraph at lines 1052--1059
+\OT1/cmr/m/n/10 pa-ram-e-ters are ac-ces-si-ble. The looka-head can be ac-cesse
+d by call-ing [][]\OT1/cmtt/m/n/10 getlookahead( )[]\OT1/cmr/m/n/10 .
+ []
+
+
+Overfull \hbox (4.38774pt too wide) in paragraph at lines 1060--1066
+[]\OT1/cmr/m/n/10 The parser is started by call-ing method [][]\OT1/cmtt/m/n/10
+ symbol parse( symbolval start )[]\OT1/cmr/m/n/10 .
+ []
+
+
+Overfull \hbox (4.97154pt too wide) in paragraph at lines 1076--1081
+[]\OT1/cmr/m/n/10 The parse was suc-ces-ful, and ended by as-sign-ing [][]\OT1/
+cmtt/m/n/10 timetosaygoodbye=true;[]\OT1/cmr/m/n/10 .
+ []
+
+[17] [18] [19]
+Overfull \hbox (0.24724pt too wide) in paragraph at lines 1261--1261
+ []\OT1/cmtt/m/n/10 %symbolcode_h{    }  // Goes into symbol.h without namespac
+e.[] 
+ []
+
+
+Overfull \hbox (10.74715pt too wide) in paragraph at lines 1261--1261
+ []                     \OT1/cmtt/m/n/10 // Intended for including attribute ty
+pes.[] 
+ []
+
+
+Overfull \hbox (36.99692pt too wide) in paragraph at lines 1261--1261
+ []                     \OT1/cmtt/m/n/10 // symbol.cpp. Intended for defining p
+rint_attr[] 
+ []
+
+
+Overfull \hbox (0.24724pt too wide) in paragraph at lines 1261--1261
+ []\OT1/cmtt/m/n/10 %parsercode_h{    }  // Goes into parser.h without namespac
+e.[] 
+ []
+
+[20] (./maphoon.bbl
+Underfull \hbox (badness 10000) in paragraph at lines 9--12
+[]\OT1/cmr/m/n/10 Akim De-maille and Paul Eg-gert.  Yacc sys-tem.
+ []
+
+) [21] (./maphoon.aux)
+ ***********
+LaTeX2e <2023-11-01> patch level 1
+L3 programming layer <2024-01-22>
+ ***********
+ ) 
+Here is how much of TeX's memory you used:
+ 513 strings out of 476183
+ 9744 string characters out of 5795621
+ 1934972 words of memory out of 5000000
+ 22576 multiletter control sequences out of 15000+600000
+ 564701 words of font info for 58 fonts, out of 8000000 for 9000
+ 14 hyphenation exceptions out of 8191
+ 35i,6n,50p,162b,274s stack positions out of 10000i,1000n,20000p,200000b,200000s
+
+Output written on maphoon.dvi (21 pages, 64896 bytes).
