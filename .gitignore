@@ -13,3 +13,5 @@ Makefile
 parsing/parser.*
 parsing/symbol.*
 parser/
+maphoon2024/
+lexing2023/
