@@ -84,7 +84,7 @@ struct_declaration_list => identifiers_colon_type
 //-----------------------defs---------------------------------
 
 
-def_specifier => DEF IDENTIFIER args_seq ASSIGN {std::cout << "Definition!\n";};		  
+def_specifier => DEF IDENTIFIER args_seq ASSIGN term {std::cout << "Definition!\n";};		  
 args_seq => args_seq args
 		  | args
 		  ;
@@ -120,8 +120,8 @@ not_expr => NOT not_expr
           | IDENTIFIER
           ;
 
-quantifier_expr => LBRACKET arg_list RBRACKET term
-                 | LT arg_list GT term
+quantifier_expr => LBRACKET identifiers_colon_type RBRACKET term
+                 | LT identifiers_colon_type GT term
                  ;
 
 

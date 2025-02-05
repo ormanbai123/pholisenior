@@ -2,7 +2,6 @@
 
 struct S := zero : O( O );
 
-
 struct Seq := 
    0 : O, 
    succ : O( O );
@@ -14,18 +13,15 @@ struct Seq :=
 struct Seq := 
    0 : O( T, O( T ) )( O, O ), 
    succ : T;
-*/
-
 
 struct Seq := 
    0, one1, 2two2, _three3, 4_four : O( T, O( T ) )( O, O ), 
    succ : T;
 
-def gen( s: Seq )( x : O )( y : O( T, O( T, T )( O, T ) )( O, O )  ) := ;
+def gen( s: Seq )( x : O )( y : O( T, O( T, T )( O, T ) )( O, O )  ) := 
+	a -> b;
 
-def gen() := ;
-
-def a () := a -> b;
+def gen( ) := a -> b;
 
 def a () := [a : Seq] a & b;
 
