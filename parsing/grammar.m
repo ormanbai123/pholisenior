@@ -94,7 +94,7 @@ args => LPAR identifiers_colon_type RPAR
 	  | LPAR RPAR
 	  ;
 
-//-----------------------defs---------------------------------
+//-----------------------terms---------------------------------
 
 term => quantifier_expr term
       | iff_expr
@@ -120,8 +120,8 @@ not_expr => NOT not_expr
           | IDENTIFIER
           ;
 
-quantifier_expr => LBRACKET identifiers_colon_type RBRACKET term
-                 | LT identifiers_colon_type GT term
+quantifier_expr => LBRACKET identifiers_colon_type RBRACKET
+                 | LT identifiers_colon_type GT
                  ;
 
 
