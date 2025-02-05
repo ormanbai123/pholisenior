@@ -1,5 +1,7 @@
 #
+
 struct S := zero : O( O );
+
 
 struct Seq := 
    0 : O, 
@@ -12,6 +14,8 @@ struct Seq :=
 struct Seq := 
    0 : O( T, O( T ) )( O, O ), 
    succ : T;
+*/
+
 
 struct Seq := 
    0, one1, 2two2, _three3, 4_four : O( T, O( T ) )( O, O ), 
@@ -20,3 +24,12 @@ struct Seq :=
 def gen( s: Seq )( x : O )( y : O( T, O( T, T )( O, T ) )( O, O )  ) := ;
 
 def gen() := ;
+
+def a () := a -> b;
+
+def a () := [a : Seq] a & b;
+
+
+//def gen( s: Seq ) (x : O) :=
+//   [ P : T(O) ] { strict(P) } -> isclosed(s, P) -> P (x).
+
