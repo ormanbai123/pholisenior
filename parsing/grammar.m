@@ -7,6 +7,7 @@
 %symbol{} struct_specifier struct_declaration_list
 %symbol{} args_seq args
 %symbol{} type type_list func
+%symbol{} iff_expr implication_expr or_expr and_expr not_expr quantifier_expr
 
 %symbol{} IDENTIFIER
 %symbol{} identifier_list identifiers_colon_type
@@ -15,12 +16,13 @@
 %symbol{} EOF FILEBAD WHITESPACE COMMENT EMPTY
 %symbol{} LPAR RPAR LBRACE RBRACE LBRACKET RBRACKET 
 %symbol{} EQ LT GT LT_EQ GT_EQ ASSIGN
-%symbol{} AND OR IMPLY
+%symbol{} AND OR IMPLY NOT IFF
 %symbol{} COLON SEMICOLON COMMA DOT 
 
 %symbol{} FORALL EXISTS
 
 %symbol{ std::string } SCANERROR
+
 //%symbol{} E F G Q PLUS MUL MINUS NUM
 
 %symbolcode_h { #include "location.h" }
@@ -52,8 +54,6 @@ Statement => struct_specifier
            ;
 
 
-term => IDENTIFIER;
-
 identifier_list => IDENTIFIER
 				 | IDENTIFIER COMMA identifier_list
 				 ;
@@ -68,8 +68,8 @@ func => type LPAR type_list RPAR
       ;    
 
 type_list => type   
-          | type_list COMMA type
-          ;
+           | type_list COMMA type
+           ;
 
 //-----------------------structs---------------------------------
 
@@ -89,11 +89,41 @@ args_seq => args_seq args
 		  | args
 		  ;
 
+
 args => LPAR identifiers_colon_type RPAR
 	  | LPAR RPAR
 	  ;
 
 //-----------------------defs---------------------------------
+
+term => quantifier_expr term
+      | iff_expr
+      ;
+
+iff_expr => implication_expr IFF iff_expr
+          | implication_expr
+          ;
+
+implication_expr => or_expr IMPLY implication_expr
+                  | or_expr
+                  ;
+
+or_expr => or_expr OR and_expr 
+         | and_expr
+         ;
+
+and_expr => and_expr AND not_expr 
+          | not_expr
+          ;
+
+not_expr => NOT not_expr 
+          | IDENTIFIER
+          ;
+
+quantifier_expr => LBRACKET arg_list RBRACKET term
+                 | LT arg_list GT term
+                 ;
+
 
 /* 
 F => F MUL G

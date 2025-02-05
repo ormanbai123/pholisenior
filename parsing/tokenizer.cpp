@@ -11,6 +11,7 @@ parsing::tokenizer::buildclassifier()
 
     classifier<char, symbolval> cls(symbolval::sym_SCANERROR);   
 
+
     auto letter = range('a', 'z') | range('A', 'Z');
     auto digit = range('0', '9');
     cls.insert( ( just('_') | letter | digit ).plus(), symbolval::sym_IDENTIFIER );
@@ -30,9 +31,12 @@ parsing::tokenizer::buildclassifier()
    cls.insert(word("<="), parsing::symbolval::sym_LT_EQ);
    cls.insert(word(">="), parsing::symbolval::sym_GT_EQ);
 
+   cls.insert(just('!'), parsing::symbolval::sym_NOT);
    cls.insert(just('&'), parsing::symbolval::sym_AND);
    cls.insert(just('|'), parsing::symbolval::sym_OR);
    cls.insert(word("->"), parsing::symbolval::sym_IMPLY);
+   cls.insert(word("<>"), parsing::symbolval::sym_IFF);
+
 
    cls.insert(just(','), parsing::symbolval::sym_COMMA);
    cls.insert(just(':'), parsing::symbolval::sym_COLON);
