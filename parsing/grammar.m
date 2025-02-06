@@ -41,18 +41,16 @@
 %source { tok.read(); }
 
 %rules 
-
 //-------------------------common--------------------------------
 
 Session => 
-    | Session Statement SEMICOLON
-    | Session _recover_ SEMICOLON
-    ;
+	     | Session Statement SEMICOLON
+         | Session _recover_ SEMICOLON
+         ;
 
 Statement => struct_specifier
            | def_specifier
            ;
-
 
 identifier_list => IDENTIFIER
 				 | IDENTIFIER COMMA identifier_list
@@ -64,8 +62,7 @@ type => IDENTIFIER
       | func
       ;
 
-func => type LPAR type_list RPAR
-      ;    
+func => type LPAR type_list RPAR;    
 
 type_list => type   
            | type_list COMMA type
@@ -73,22 +70,19 @@ type_list => type
 
 //-----------------------structs---------------------------------
 
-struct_specifier => STRUCT IDENTIFIER ASSIGN struct_declaration_list {std::cout << "STRUCT!\n";}
-                  ; 
+struct_specifier => STRUCT IDENTIFIER ASSIGN struct_declaration_list {std::cout << "STRUCT!\n";}; 
 
 struct_declaration_list => identifiers_colon_type
                          | identifiers_colon_type COMMA struct_declaration_list 
                          ;
 
-
 //-----------------------defs---------------------------------
 
-
 def_specifier => DEF IDENTIFIER args_seq ASSIGN term {std::cout << "Definition!\n";};		  
+
 args_seq => args_seq args
 		  | args
 		  ;
-
 
 args => LPAR identifiers_colon_type RPAR
 	  | LPAR RPAR
@@ -127,21 +121,21 @@ quantifier_expr => LBRACKET identifiers_colon_type RBRACKET
 
 /* 
 F => F MUL G
-    | F MUL Q E
-    | G
-    ;
+   | F MUL Q E
+   | G
+   ;
 
 G => MINUS G 
-    | MINUS Q E
-    | IDENTIFIER
-    | NUM
-    ;
+   | MINUS Q E
+   | IDENTIFIER
+   | NUM
+   ;
 
 Q => FORALL
-    | EXISTS
-    | Q FORALL
-    | Q EXISTS
-    ; 
+   | EXISTS
+   | Q FORALL
+   | Q EXISTS
+   ; 
 */
 
 %end
