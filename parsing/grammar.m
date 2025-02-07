@@ -92,13 +92,15 @@ args => LPAR identifiers_colon_type RPAR
 
 term => quantifier_expr term
       | iff_expr
-      ;
+      ;  
 
 iff_expr => implication_expr IFF iff_expr
+          | implication_expr IFF quantifier_expr term
           | implication_expr
           ;
 
 implication_expr => or_expr IMPLY implication_expr
+                  | or_expr IMPLY quantifier_expr term
                   | or_expr
                   ;
 
@@ -120,6 +122,12 @@ quantifier_expr => LBRACKET identifiers_colon_type RBRACKET
 
 
 /* 
+E => Q E
+   | E + F
+   | E + Q E
+   | F
+   ;
+
 F => F MUL G
    | F MUL Q E
    | G
