@@ -90,37 +90,40 @@ args => LPAR identifiers_colon_type RPAR
 
 //-----------------------terms---------------------------------
 
-term => quantifier_expr term
-      | iff_expr
+term => iff_expr
+      | quantifier_expr iff_expr
       ;  
 
 iff_expr => implication_expr IFF iff_expr
-          | implication_expr IFF quantifier_expr term
+          | implication_expr IFF quantifier_expr iff_expr
           | implication_expr
           ;
 
 implication_expr => or_expr IMPLY implication_expr
-                  | or_expr IMPLY quantifier_expr term
+                  | or_expr IMPLY quantifier_expr implication_expr
                   | or_expr
                   ;
 
 or_expr => or_expr OR and_expr 
+         | or_expr OR quantifier_expr and_expr
          | and_expr
          ;
 
 and_expr => and_expr AND not_expr 
+          | and_expr AND quantifier_expr not_expr
           | not_expr
           ;
 
 not_expr => NOT not_expr 
+          | NOT quantifier_expr not_expr
           | IDENTIFIER
           ;
 
 quantifier_expr => LBRACKET identifiers_colon_type RBRACKET
                  | LT identifiers_colon_type GT
+                 | quantifier_expr LBRACKET identifiers_colon_type RBRACKET
+                 | quantifier_expr LT identifiers_colon_type GT
                  ;
-
-
 /* 
 E => Q E
    | E + F

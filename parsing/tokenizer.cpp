@@ -35,7 +35,7 @@ parsing::tokenizer::buildclassifier()
    cls.insert(just('&'), parsing::symbolval::sym_AND);
    cls.insert(just('|'), parsing::symbolval::sym_OR);
    cls.insert(word("->"), parsing::symbolval::sym_IMPLY);
-   cls.insert(word("<>"), parsing::symbolval::sym_IFF);
+   cls.insert(word("<->"), parsing::symbolval::sym_IFF);
 
 
    cls.insert(just(','), parsing::symbolval::sym_COMMA);

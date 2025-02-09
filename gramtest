@@ -25,7 +25,7 @@ def gen( ) := a -> b;
 
 def a () := [a : Seq] a & b;
 
-def a () := a <> [x : O] x -> c | d;
+def a () := a <-> [x : O] x -> c | d;
 
 //def gen( s: Seq ) (x : O) :=
 //   [ P : T(O) ] { strict(P) } -> isclosed(s, P) -> P (x).
