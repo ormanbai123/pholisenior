@@ -27,6 +27,14 @@ def a () := [a : Seq] a & b;
 
 def a () := a <-> [x : O] x -> c | d;
 
+def a () := a -> b -> [x : O] <y : T(O)> c & d;
+
+def functional(P : T(O)) :=
+   [x : O] {Px} -> <y : O> {Qy} & Rx;
+
+def total (P, Q : T(O), R : T(O,O)) := 
+      [x : O] x -> <y1, y2 : O> y1 <> [y2 : T(O(T))] y2 -> y3;
+
 //def gen( s: Seq ) (x : O) :=
 //   [ P : T(O) ] { strict(P) } -> isclosed(s, P) -> P (x).
 

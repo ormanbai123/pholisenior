@@ -95,28 +95,36 @@ term => iff_expr
       ;  
 
 iff_expr => implication_expr IFF iff_expr
-          | implication_expr IFF quantifier_expr iff_expr
           | implication_expr
+          | implication_expr IFF quantifier_expr iff_expr
           ;
 
 implication_expr => or_expr IMPLY implication_expr
-                  | or_expr IMPLY quantifier_expr implication_expr
+                  | LBRACE term RBRACE IMPLY implication_expr
                   | or_expr
+                  | or_expr IMPLY quantifier_expr implication_expr
+                  | LBRACE term RBRACE IMPLY quantifier_expr implication_expr
                   ;
 
 or_expr => or_expr OR and_expr 
-         | or_expr OR quantifier_expr and_expr
+         | LBRACE term RBRACE OR and_expr
          | and_expr
+         | or_expr OR quantifier_expr and_expr
+         | LBRACE term RBRACE OR quantifier_expr and_expr
          ;
 
 and_expr => and_expr AND not_expr 
-          | and_expr AND quantifier_expr not_expr
+          | LBRACE term RBRACE AND not_expr
           | not_expr
+          | and_expr AND quantifier_expr not_expr
+          | LBRACE term RBRACE AND quantifier_expr not_expr 
           ;
 
 not_expr => NOT not_expr 
           | NOT quantifier_expr not_expr
           | IDENTIFIER
+          | NOT quantifier_expr not_expr
+          | LPAR term RPAR
           ;
 
 quantifier_expr => LBRACKET identifiers_colon_type RBRACKET
@@ -124,30 +132,6 @@ quantifier_expr => LBRACKET identifiers_colon_type RBRACKET
                  | quantifier_expr LBRACKET identifiers_colon_type RBRACKET
                  | quantifier_expr LT identifiers_colon_type GT
                  ;
-/* 
-E => Q E
-   | E + F
-   | E + Q E
-   | F
-   ;
-
-F => F MUL G
-   | F MUL Q E
-   | G
-   ;
-
-G => MINUS G 
-   | MINUS Q E
-   | IDENTIFIER
-   | NUM
-   ;
-
-Q => FORALL
-   | EXISTS
-   | Q FORALL
-   | Q EXISTS
-   ; 
-*/
 
 %end
 
