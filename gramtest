@@ -33,7 +33,7 @@ def functional(P : T(O)) :=
    [x : O] {Px} -> <y : O> {Qy} & Rx;
 
 def total (P, Q : T(O), R : T(O,O)) := 
-      [x : O] x -> <y1, y2 : O> y1 <> [y2 : T(O(T))] y2 -> y3;
+      [x : O] x -> <y1, y2 : O> y1 <-> [y2 : T(O(T))] y2 -> y3;
 
 //def gen( s: Seq ) (x : O) :=
 //   [ P : T(O) ] { strict(P) } -> isclosed(s, P) -> P (x).

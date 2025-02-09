@@ -5,7 +5,7 @@
 
 %symbol{} term def_specifier
 %symbol{} struct_specifier struct_declaration_list
-%symbol{} args_seq args
+%symbol{} args_seq args args_list
 %symbol{} type type_list func
 %symbol{} iff_expr implication_expr or_expr and_expr not_expr quantifier_expr
 
@@ -84,9 +84,13 @@ args_seq => args_seq args
 		  | args
 		  ;
 
-args => LPAR identifiers_colon_type RPAR
+args => LPAR args_list RPAR
 	  | LPAR RPAR
 	  ;
+
+args_list => identifiers_colon_type
+		   | identifiers_colon_type COMMA args_list
+		   ;
 
 //-----------------------terms---------------------------------
 
@@ -121,7 +125,6 @@ and_expr => and_expr AND not_expr
           ;
 
 not_expr => NOT not_expr 
-          | NOT quantifier_expr not_expr
           | IDENTIFIER
           | NOT quantifier_expr not_expr
           | LPAR term RPAR
