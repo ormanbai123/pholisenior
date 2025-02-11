@@ -32,7 +32,7 @@
 %symbolcode_h { #include "./logic/type.h" }
 %symbolcode_h { #include "./logic/selector.h" }
 %symbolcode_h { #include "./identifier.h" }
-
+%symbolcode_h { #include <typeinfo> }
 
 %symbolspace parsing
 %parserspace parsing
@@ -65,7 +65,7 @@ identifier_list => IDENTIFIER
 
 identifiers_colon_type => identifier_list COLON type;
 
-type => IDENTIFIER:s {return logic::type (logic::type_unchecked, identifier() + s); }
+type => IDENTIFIER:s { return logic::type (logic::type_unchecked, identifier() + s); }
       | func:t {return t;}
       ;
 

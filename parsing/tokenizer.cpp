@@ -96,8 +96,11 @@ restart:
 
    if( p.first == sym_IDENTIFIER )
    {
+      std::string_view v = inp. view( p. second );      
+      std::string attr = std::string(v);
+      
       inp.commit( p.second );
-      return symbol( sym_IDENTIFIER, startloc);
+      return symbol( sym_IDENTIFIER, startloc, attr);
    }
    // All the remaining tokens have no attribute:
 
