@@ -1,0 +1,15 @@
+
+- Add constructors that construct with a certain capacity.
+- Add reserve( )?
+- The reallocation strategy must be modified.
+  I have implemented scalar_list, and I believe that 
+  there are inconsistencies in the non-sharing policy.
+  Currently push_back of scalar_vector ensures non-sharing, while
+  push_back of scalar_list assumes it. It should
+  be done by a separate function that checks writability up to a certain
+  capacity. This is consistent because assignment also
+  does not check writability. I think the strategy in scalar_list 
+  is the right one.
+
+
+

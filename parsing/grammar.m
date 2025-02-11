@@ -6,10 +6,11 @@
 %symbol{} term def_specifier
 %symbol{} struct_specifier struct_declaration_list
 %symbol{} args_seq args args_list
-%symbol{} type type_list func
+%symbol{logic::type} type func 
+%symbol{std::vector<logic::type>} type_list
 %symbol{} iff_expr implication_expr or_expr and_expr not_expr quantifier_expr
 
-%symbol{} IDENTIFIER
+%symbol{std::string} IDENTIFIER
 %symbol{} identifier_list identifiers_colon_type
 %symbol{} STRUCT DEF FRM
 
@@ -26,6 +27,12 @@
 //%symbol{} E F G Q PLUS MUL MINUS NUM
 
 %symbolcode_h { #include "location.h" }
+%symbolcode_h { #include <vector> }
+%symbolcode_h { #include <string> }
+%symbolcode_h { #include "./logic/type.h" }
+%symbolcode_h { #include "./logic/selector.h" }
+%symbolcode_h { #include "./identifier.h" }
+
 
 %symbolspace parsing
 %parserspace parsing
@@ -58,14 +65,15 @@ identifier_list => IDENTIFIER
 
 identifiers_colon_type => identifier_list COLON type;
 
-type => IDENTIFIER
-      | func
+type => IDENTIFIER:s {return logic::type (logic::type_unchecked, identifier() + s); }
+      | func:t {return t;}
       ;
 
-func => type LPAR type_list RPAR;    
+func => type:t LPAR type_list:tl RPAR 
+		{return logic::type (logic::type_func, t, tl.begin(), tl.end()); }; 
 
-type_list => type   
-           | type_list COMMA type
+type_list => type:t {return std::vector<logic::type> (1, t);}
+           | type_list:tl COMMA type:t {tl.push_back(t); return tl;}
            ;
 
 //-----------------------structs---------------------------------
