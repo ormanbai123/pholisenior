@@ -12,6 +12,7 @@ int main () {
     auto prs = parsing::parser(tok);
     prs.maxrecovery = 1000000;
 
+    
     std::cout << ":- ";
     auto res = prs.parse(parsing::sym_Session);
     if (res.val == parsing::sym__recover_) {
