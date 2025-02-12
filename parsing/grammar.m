@@ -4,14 +4,16 @@
 %symbol{} Statement Expr
 
 %symbol{} term def_specifier
-%symbol{} struct_specifier struct_declaration_list
-%symbol{} args_seq args args_list
+%symbol{std::pair<std::string, std::vector<std::pair<std::vector<std::string>, logic::type>>>} struct_specifier
+%symbol{} args_seq 
 %symbol{logic::type} type func 
 %symbol{std::vector<logic::type>} type_list
 %symbol{} iff_expr implication_expr or_expr and_expr not_expr quantifier_expr
 
+%symbol{std::vector<std::pair<std::vector<std::string>, logic::type>>} idents_type_list 
 %symbol{std::string} IDENTIFIER
-%symbol{} identifier_list identifiers_colon_type
+%symbol{std::vector<std::string>} identifier_list 
+%symbol{std::pair<std::vector<std::string>, logic::type>} identifiers_colon_type
 %symbol{} STRUCT DEF FRM
 
 %symbol{} EOF FILEBAD WHITESPACE COMMENT EMPTY
@@ -59,47 +61,41 @@ Statement => struct_specifier
            | def_specifier
            ;
 
-identifier_list => IDENTIFIER
-				 | IDENTIFIER COMMA identifier_list
+idents_type_list => identifiers_colon_type:ict {return std::vector (1, ict);}
+		   | identifiers_colon_type:ict COMMA idents_type_list:v 
+		   		{v.push_back(ict); return v;}
+		   ;
+
+identifiers_colon_type => identifier_list:v COLON type:t {return {v, t};};
+
+identifier_list => IDENTIFIER:s {return std::vector (1, s);}
+				 | IDENTIFIER:s COMMA identifier_list:v {v.push_back(s); return v;}
 				 ;
 
-identifiers_colon_type => identifier_list COLON type;
-
-type => IDENTIFIER:s { return logic::type (logic::type_unchecked, identifier() + s); }
+type => IDENTIFIER:s {return logic::type (logic::type_unchecked, identifier() + s);}
       | func:t {return t;}
       ;
 
-func => type:t LPAR type_list:tl RPAR 
-		{return logic::type (logic::type_func, t, tl.begin(), tl.end()); }; 
+func => type:t LPAR type_list:v RPAR 
+		{return logic::type (logic::type_func, t, v.begin(), v.end());}; 
 
-type_list => type:t {return std::vector<logic::type> (1, t);}
-           | type_list:tl COMMA type:t {tl.push_back(t); return tl;}
+type_list => type:t {return std::vector (1, t);}
+           | type_list:v COMMA type:t {v.push_back(t); return v;}
            ;
 
 //-----------------------structs---------------------------------
 
-struct_specifier => STRUCT IDENTIFIER ASSIGN struct_declaration_list {std::cout << "STRUCT!\n";}; 
-
-struct_declaration_list => identifiers_colon_type
-                         | identifiers_colon_type COMMA struct_declaration_list 
-                         ;
+struct_specifier => STRUCT IDENTIFIER:s ASSIGN idents_type_list:v  
+					{std::cout << "STRUCT!\n"; return {s, v};}; 
 
 //-----------------------defs---------------------------------
 
 def_specifier => DEF IDENTIFIER args_seq ASSIGN term {std::cout << "Definition!\n";};		  
 
-args_seq => args_seq args
-		  | args
+args_seq => args_seq LPAR idents_type_list RPAR
+		  | LPAR idents_type_list RPAR
+		  | LPAR RPAR
 		  ;
-
-args => LPAR args_list RPAR
-	  | LPAR RPAR
-	  ;
-
-args_list => identifiers_colon_type
-		   | identifiers_colon_type COMMA args_list
-		   ;
-
 //-----------------------terms---------------------------------
 
 term => iff_expr
