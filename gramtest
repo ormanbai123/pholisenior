@@ -1,6 +1,8 @@
 #
 
-struct S := zero : O;
+def a () := [x : O] a & [x : O] b -> c;
+
+def a () := a & [ x1, x2 : O ] { b } -> c;
 
 
 struct Seq := 
@@ -22,20 +24,33 @@ struct Seq :=
 def gen( s: Seq )( x : O )( y : O( T, O( T, T )( O, T ) )( O, O )  ) := 
 	a -> b;
 
-def gen( ) := a -> b;
+def isclosed( s : Seq, P : T(O) ) :=
+   P( s.0 ) & [ x : O ] P(x) -> P( s. succ(x) );
 
-def a () := [a : Seq] a & b;
+def gen( s : Seq ) ( x : O ) :=
+   [ P : T(O) ] { strict(P) } -> isclosed( s, P ) -> P(x);
 
-def a () := a <-> [x : O] x -> c | d;
 
-def a () := a -> b -> [x : O] <y : T(O)> c & d;
+// (Note) Probably incorrect syntax.
+def induction( s : Seq, P : T(O) ) := { stricton( s.gen, P ) } 
+   -> P( s.0 ) 
+      -> ( [x:O] { s. gen(x) } P(x) -> P(s. succ(x)) )
+         -> [ x: O ] { s. gen(x) } -> P(x);
 
-def functional(P : T(O)) :=
-   [x : O] {Px} -> <y : O> {Qy} & Rx;
 
-def total (P, Q : T(O), R : T(O,O)) := 
-      [x : O] x -> <y1, y2 : O> y1 <-> [y2 : T(O(T))] y2 -> y3; 
+def homrel( s1, s2 : Seq ) ( P : T(O,O) ) :=
+   P( s1. 0, s2. 0 ) & 
+   [ x1, x2 : O ] { gen( s1, x1 ) & gen( s2, x2 ) } 
+      -> P(x1,x2) -> P( s1. succ(x1), s2. succ(x2) );
 
-//def gen( s: Seq ) (x : O) :=
-//   [ P : T(O) ] { strict(P) } -> isclosed(s, P) -> P (x).
+def total( P : T(O), Q:T(O), R: T(O,O) ) :=
+   [ x : O ] { P(x) } -> < y : O > { Q(y) } & R(x,y);
 
+def minhomrel( s1 : Seq, s2: Seq )( x1:O, x2:O ) :=
+   [ P : T(O,O) ] { stricton( prod( s1.gen, s2.gen ), P ) }
+      -> homrel( s1, s2, P ) -> P(x1,x2);
+
+def freegen( s1 : Seq ) :=
+   [ s2 : Seq ] < P : T(O,O) > 
+      { strict( prod( s1. gen, s2. gen ), P ) } &
+      homerel( s1, s2, P ) & functional( s1. gen, s2. gen, P ); */

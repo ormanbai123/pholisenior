@@ -26,7 +26,9 @@
 
 %symbol{ std::string } SCANERROR
 
-//%symbol{} E F G Q PLUS MUL MINUS NUM
+%symbol{} apply_args apply_expr member_apply_expr
+
+%symbol{} iff_expr_q implication_expr_q or_expr_q and_expr_q not_expr_q
 
 %symbolcode_h { #include "location.h" }
 %symbolcode_h { #include <vector> }
@@ -114,22 +116,23 @@ implication_expr => or_expr IMPLY implication_expr
                   | LBRACE term RBRACE IMPLY quantifier_expr implication_expr
                   ;
 
-or_expr => or_expr OR and_expr 
+or_expr => and_expr OR or_expr 
          | LBRACE term RBRACE OR and_expr
          | and_expr
-         | or_expr OR quantifier_expr and_expr
+         | and_expr OR quantifier_expr or_expr
          | LBRACE term RBRACE OR quantifier_expr and_expr
          ;
 
-and_expr => and_expr AND not_expr 
+and_expr => not_expr AND and_expr 
           | LBRACE term RBRACE AND not_expr
           | not_expr
-          | and_expr AND quantifier_expr not_expr
+          | not_expr AND quantifier_expr and_expr
           | LBRACE term RBRACE AND quantifier_expr not_expr 
           ;
 
 not_expr => NOT not_expr 
-          | IDENTIFIER
+          | member_apply_expr
+          | apply_expr
           | NOT quantifier_expr not_expr
           | LPAR term RPAR
           ;
@@ -139,6 +142,20 @@ quantifier_expr => LBRACKET identifiers_colon_type RBRACKET
                  | quantifier_expr LBRACKET identifiers_colon_type RBRACKET
                  | quantifier_expr LT identifiers_colon_type GT
                  ;
+
+
+apply_args => term
+            | term COMMA apply_args
+            ;
+
+apply_expr => IDENTIFIER LPAR RPAR
+            | IDENTIFIER LPAR apply_args RPAR 
+            ; 
+
+member_apply_expr => member_apply_expr DOT IDENTIFIER
+                   | member_apply_expr DOT apply_expr
+                   | IDENTIFIER
+                   ;
 
 %end
 

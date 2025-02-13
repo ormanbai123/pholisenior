@@ -1,6 +1,3 @@
-
-
-
 # Automatically generated Makefile
 # Makefile-generator created by Hans de Nivelle and Akhmetzhan Kussainov, 2023
 
