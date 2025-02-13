@@ -1,10 +1,5 @@
 #
 
-def a () := [x : O] a & [x : O] b -> c;
-
-def a () := a & [ x1, x2 : O ] { b } -> c;
-
-
 struct Seq := 
    0 : O, 
    succ : O( O );
@@ -20,6 +15,13 @@ struct Seq :=
 struct Seq := 
    0, one1, 2two2, _three3, 4_four : O( T, O( T ) )( O, O ), 
    succ : T;
+   
+/*
+
+def a () := [x : O] a & [x : O] b -> c;
+
+def a () := a & [ x1, x2 : O ] { b } -> c;
+
 
 def gen( s: Seq )( x : O )( y : O( T, O( T, T )( O, T ) )( O, O )  ) := 
 	a -> b;

@@ -4,7 +4,7 @@
 %symbol{} Statement Expr
 
 %symbol{} term def_specifier
-%symbol{std::pair<std::string, std::vector<std::pair<std::vector<std::string>, logic::type>>>} struct_specifier
+%symbol{logic::belief} struct_specifier
 %symbol{} args_seq 
 %symbol{logic::type} type func 
 %symbol{std::vector<logic::type>} type_list
@@ -37,17 +37,19 @@
 %symbolcode_h { #include "./logic/selector.h" }
 %symbolcode_h { #include "./identifier.h" }
 %symbolcode_h { #include <typeinfo> }
+%symbolcode_h { #include "./logic/belief.h"}
+%symbolcode_h { #include "./logic/beliefstate.h"}
 
 %symbolspace parsing
 %parserspace parsing
 
 %parsercode_h { #include "tokenizer.h" }
-// %parsercode_h { #include "evaluator.h" }
+%parsercode_h { #include "evaluator.h" }
 
 %infotype {location}
 
 %parameter {tokenizer}              tok
-// %parameter {evaluator}              eval
+%parameter {evaluator}              eval
 
 %source { tok.read(); }
 
@@ -59,20 +61,19 @@ Session =>
          | Session _recover_ SEMICOLON
          ;
 
-Statement => struct_specifier
+Statement => struct_specifier : strct { eval.add_belief(strct); }
            | def_specifier
            ;
 
 idents_type_list => identifiers_colon_type:ict {return std::vector (1, ict);}
-		   | identifiers_colon_type:ict COMMA idents_type_list:v 
-		   		{v.push_back(ict); return v;}
-		   ;
+		      | identifiers_colon_type:ict COMMA idents_type_list:v {v.push_back(ict); return v;}
+		      ;
 
 identifiers_colon_type => identifier_list:v COLON type:t {return {v, t};};
 
 identifier_list => IDENTIFIER:s {return std::vector (1, s);}
-				 | IDENTIFIER:s COMMA identifier_list:v {v.push_back(s); return v;}
-				 ;
+                 | IDENTIFIER:s COMMA identifier_list:v {v.push_back(s); return v;}
+                 ;
 
 type => IDENTIFIER:s {return logic::type (logic::type_unchecked, identifier() + s);}
       | func:t {return t;}
@@ -88,7 +89,20 @@ type_list => type:t {return std::vector (1, t);}
 //-----------------------structs---------------------------------
 
 struct_specifier => STRUCT IDENTIFIER:s ASSIGN idents_type_list:v  
-					{std::cout << "STRUCT!\n"; return {s, v};}; 
+{
+      std::cout << "STRUCT!\n";
+
+      using namespace logic;
+
+      structdef strctseq;
+      for (auto i = v.end(); i-- != v.begin(); ) {
+            for (auto j = (*i).first.end(); j-- != (*i).first.begin(); ) {
+                  strctseq.append(identifier() + (*j), (*i).second);
+            }
+      } 
+
+      return belief(bel_struct, identifier() + s, strctseq);
+}; 
 
 //-----------------------defs---------------------------------
 

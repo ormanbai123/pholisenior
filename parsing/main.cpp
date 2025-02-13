@@ -3,13 +3,20 @@
 #include "tokenizer.h"
 #include "parser.h"
 
+#include "logic/beliefstate.h"
+#include "evaluator.h"
+
 int main () {
+
+    logic::beliefstate blfs;
+    evaluator eval(blfs);
+
 
     parsing::tokenizer tok(lexing::filereader(&std::cin, "std::cin"));
 
     tok.test();
 
-    auto prs = parsing::parser(tok);
+    auto prs = parsing::parser(tok, eval);
     prs.maxrecovery = 1000000;
     // prs.debug = 1;
     
@@ -19,6 +26,9 @@ int main () {
         std::cout << "Syntax error in input!\n";
         return 1;
     }
+
+
+    std::cout << "\n\n" << blfs << "\n";
 
     return 0;
 }
