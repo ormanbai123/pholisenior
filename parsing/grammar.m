@@ -110,9 +110,11 @@ struct_specifier => STRUCT IDENTIFIER:s ASSIGN idents_type_list:v
 def_specifier => DEF IDENTIFIER args_seq ASSIGN term {std::cout << "Definition!\n";};		  
 
 args_seq => args_seq:st LPAR idents_type_list:v RPAR {st.push(v); return st;}
-		  | LPAR idents_type_list:v RPAR {std::stack<std::vector<std::pair<std::vector<std::string>,
-		  logic::type>>> st; st.push(v); return st;}
-		  | LPAR RPAR {std::stack<std::vector<std::pair<std::vector<std::string>, logic::type>>> st; return st;}
+		  | LPAR idents_type_list:v RPAR 
+		    {std::stack<std::vector<std::pair<std::vector<std::string>,
+		     logic::type>>> st; st.push(v); return st;}
+		  | LPAR RPAR {std::stack<std::vector<std::pair<std::vector<std::string>,
+		  			   logic::type>>> st; return st;}
 		  ;
 //-----------------------terms---------------------------------
 
