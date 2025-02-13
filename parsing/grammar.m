@@ -66,43 +66,46 @@ Statement => struct_specifier : strct { eval.add_belief(strct); }
            | def_specifier
            ;
 
-idents_type_list => identifiers_colon_type:ict {return std::vector (1, ict);}
-		      | identifiers_colon_type:ict COMMA idents_type_list:v {v.push_back(ict); return v;}
-		      ;
+idents_type_list => identifiers_colon_type:ict {
+						return std::vector (1, ict);
+				  }
+		      	  | identifiers_colon_type:ict COMMA idents_type_list:v {
+						v.push_back(ict); return v;
+				  };
 
 identifiers_colon_type => identifier_list:v COLON type:t {return {v, t};};
 
 identifier_list => IDENTIFIER:s {return std::vector (1, s);}
-                 | IDENTIFIER:s COMMA identifier_list:v {v.push_back(s); return v;}
-                 ;
+                 | IDENTIFIER:s COMMA identifier_list:v {
+				      v.push_back(s); return v;
+				 };
 
-type => IDENTIFIER:s {return logic::type (logic::type_unchecked, identifier() + s);}
-      | func:t {return t;}
-      ;
+type => IDENTIFIER:s {
+			return logic::type (logic::type_unchecked, identifier() + s);
+	  }
+      | func:t {return t;};
 
-func => type:t LPAR type_list:v RPAR 
-		{return logic::type (logic::type_func, t, v.begin(), v.end());}; 
+
+func => type:t LPAR type_list:v RPAR {
+			return logic::type (logic::type_func, t, v.begin(), v.end());
+		}; 
 
 type_list => type:t {return std::vector (1, t);}
-           | type_list:v COMMA type:t {v.push_back(t); return v;}
-           ;
+           | type_list:v COMMA type:t {v.push_back(t); return v;};
 
 //-----------------------structs---------------------------------
 
 struct_specifier => STRUCT IDENTIFIER:s ASSIGN idents_type_list:v  
 {
-      std::cout << "STRUCT!\n";
+	std::cout << "STRUCT!\n";
 
-      using namespace logic;
-
-      structdef strctseq;
-      for (auto i = v.end(); i-- != v.begin(); ) {
-            for (auto j = (*i).first.end(); j-- != (*i).first.begin(); ) {
-                  strctseq.append(identifier() + (*j), (*i).second);
-            }
-      } 
-
-      return belief(bel_struct, identifier() + s, strctseq);
+    logic::structdef strctseq;
+    for (auto it = v.end(); it-- != v.begin(); ) {
+    	for (auto jt = it -> first.end(); jt-- != it -> first.begin(); ) {
+        	strctseq.append(identifier() + (*jt), it -> second);
+       	}
+    } 
+    return logic::belief(logic::bel_struct, identifier() + s, strctseq);
 }; 
 
 //-----------------------defs---------------------------------
@@ -110,12 +113,14 @@ struct_specifier => STRUCT IDENTIFIER:s ASSIGN idents_type_list:v
 def_specifier => DEF IDENTIFIER args_seq ASSIGN term {std::cout << "Definition!\n";};		  
 
 args_seq => args_seq:st LPAR idents_type_list:v RPAR {st.push(v); return st;}
-		  | LPAR idents_type_list:v RPAR 
-		    {std::stack<std::vector<std::pair<std::vector<std::string>,
-		     logic::type>>> st; st.push(v); return st;}
-		  | LPAR RPAR {std::stack<std::vector<std::pair<std::vector<std::string>,
-		  			   logic::type>>> st; return st;}
-		  ;
+		  | LPAR idents_type_list:v RPAR {
+			  std::stack<std::vector<std::pair<std::vector<std::string>,
+		      logic::type>>> st; st.push(v); return st;
+		  }
+		  | LPAR RPAR {
+		      std::stack<std::vector<std::pair<std::vector<std::string>,
+		  	  logic::type>>> st; return st;
+		  };
 //-----------------------terms---------------------------------
 
 term => iff_expr
