@@ -5,7 +5,7 @@
 
 %symbol{} term def_specifier
 %symbol{logic::belief} struct_specifier
-%symbol{} args_seq 
+%symbol{std::stack<std::vector<std::pair<std::vector<std::string>, logic::type>>>} args_seq 
 %symbol{logic::type} type func 
 %symbol{std::vector<logic::type>} type_list
 %symbol{} iff_expr implication_expr or_expr and_expr not_expr quantifier_expr
@@ -33,6 +33,7 @@
 %symbolcode_h { #include "location.h" }
 %symbolcode_h { #include <vector> }
 %symbolcode_h { #include <string> }
+%symbolcode_h { #include <stack> }
 %symbolcode_h { #include "./logic/type.h" }
 %symbolcode_h { #include "./logic/selector.h" }
 %symbolcode_h { #include "./identifier.h" }
@@ -108,9 +109,10 @@ struct_specifier => STRUCT IDENTIFIER:s ASSIGN idents_type_list:v
 
 def_specifier => DEF IDENTIFIER args_seq ASSIGN term {std::cout << "Definition!\n";};		  
 
-args_seq => args_seq LPAR idents_type_list RPAR
-		  | LPAR idents_type_list RPAR
-		  | LPAR RPAR
+args_seq => args_seq:st LPAR idents_type_list:v RPAR {st.push(v); return st;}
+		  | LPAR idents_type_list:v RPAR {std::stack<std::vector<std::pair<std::vector<std::string>,
+		  logic::type>>> st; st.push(v); return st;}
+		  | LPAR RPAR {std::stack<std::vector<std::pair<std::vector<std::string>, logic::type>>> st; return st;}
 		  ;
 //-----------------------terms---------------------------------
 
