@@ -66,31 +66,30 @@ Statement => struct_specifier : strct { eval.add_belief(strct); }
            | def_specifier
            ;
 
-idents_type_list => identifiers_colon_type:ict {
-						return std::vector (1, ict);
-				  }
-		      	  | identifiers_colon_type:ict COMMA idents_type_list:v {
-						v.push_back(ict); return v;
-				  };
+idents_type_list => identifiers_colon_type:ict { return {ict}; }
+		      	  | identifiers_colon_type:ict COMMA idents_type_list:v 
+				      { v.push_back(ict); return v; }
+			      ;
 
 identifiers_colon_type => identifier_list:v COLON type:t {return {v, t};};
 
-identifier_list => IDENTIFIER:s {return std::vector (1, s);}
-                 | IDENTIFIER:s COMMA identifier_list:v {
-				      v.push_back(s); return v;
-				 };
+identifier_list => IDENTIFIER:s            { return {s}; }
+  | IDENTIFIER:s COMMA identifier_list:v   { v.push_back(s); return v; }
+  ;
 
-type => IDENTIFIER:s {
-			return logic::type (logic::type_unchecked, identifier() + s);
+type => IDENTIFIER:s 
+      {
+			return logic::type( logic::type_unchecked, identifier() + s );
 	  }
-      | func:t {return t;};
+      | func:t { return t; }
+	  ;
 
 
 func => type:t LPAR type_list:v RPAR {
 			return logic::type (logic::type_func, t, v.begin(), v.end());
 		}; 
 
-type_list => type:t {return std::vector (1, t);}
+type_list => type:t {return {t};}
            | type_list:v COMMA type:t {v.push_back(t); return v;};
 
 //-----------------------structs---------------------------------
