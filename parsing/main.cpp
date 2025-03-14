@@ -18,7 +18,7 @@ int main () {
 
     auto prs = parsing::parser(tok, eval);
     prs.maxrecovery = 1000000;
-    // prs.debug = 1;
+    prs.debug = 1;
     
     std::cout << ":- ";
     auto res = prs.parse(parsing::sym_Session);
@@ -28,7 +28,7 @@ int main () {
     }
 
 
-    std::cout << "\n\n" << blfs << "\n";
+    //std::cout << "\n\n" << blfs << "\n";
 
     return 0;
 }

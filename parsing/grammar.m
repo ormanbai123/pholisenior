@@ -8,7 +8,7 @@
 %symbol{std::stack<std::vector<std::pair<std::vector<std::string>, logic::type>>>} args_seq 
 %symbol{logic::type} type func 
 %symbol{std::vector<logic::type>} type_list
-%symbol{} iff_expr implication_expr or_expr and_expr not_expr quantifier_expr
+%symbol{} iff_expr implication_expr or_expr and_expr not_expr quantifier_expr lazy_implication lazy_or lazy_and
 
 %symbol{std::vector<std::pair<std::vector<std::string>, logic::type>>} idents_type_list 
 %symbol{std::string} IDENTIFIER
@@ -126,30 +126,35 @@ term => iff_expr
       | quantifier_expr iff_expr
       ;  
 
-iff_expr => implication_expr IFF iff_expr
-          | implication_expr
-          | implication_expr IFF quantifier_expr iff_expr
+iff_expr => implication_expr 
+          | implication_expr IFF term
           ;
 
-implication_expr => or_expr IMPLY implication_expr
-                  | LBRACE term RBRACE IMPLY implication_expr
-                  | or_expr
+lazy_implication => LBRACE term RBRACE IMPLY;
+
+lazy_or => LBRACE term RBRACE OR;
+
+lazy_and => LBRACE term RBRACE AND;
+
+implication_expr => or_expr 
+                  | or_expr IMPLY implication_expr
                   | or_expr IMPLY quantifier_expr implication_expr
-                  | LBRACE term RBRACE IMPLY quantifier_expr implication_expr
+                  | lazy_implication implication_expr
+                  | lazy_implication quantifier_expr implication_expr
                   ;
 
-or_expr => and_expr OR or_expr 
-         | LBRACE term RBRACE OR and_expr
-         | and_expr
+or_expr => and_expr 
+         | and_expr OR or_expr 
          | and_expr OR quantifier_expr or_expr
-         | LBRACE term RBRACE OR quantifier_expr and_expr
+         | lazy_or and_expr
+         | lazy_or quantifier_expr and_expr
          ;
 
-and_expr => not_expr AND and_expr 
-          | LBRACE term RBRACE AND not_expr
-          | not_expr
+and_expr => not_expr 
+          | not_expr AND and_expr 
           | not_expr AND quantifier_expr and_expr
-          | LBRACE term RBRACE AND quantifier_expr not_expr 
+          | lazy_and not_expr
+          | lazy_and quantifier_expr not_expr 
           ;
 
 not_expr => NOT not_expr 
@@ -180,4 +185,4 @@ member_apply_expr => member_apply_expr DOT IDENTIFIER
                    ;
 
 %end
-
+ 
