@@ -1,0 +1,349 @@
+
+// Terminals (tokens returned by the tokenizer): 
+
+%startsymbol Input EOF
+
+%symbol       Input SortDecls Formulas FunctionDecls 
+   // None of these symbols have an attribute, because they go 
+   // directly into their containers.
+
+%symbol       FormClass
+%symbol       SORTS FUNCTIONS ASSUMPTIONS THEOREMS TYPEFORMS TYPEHINTS
+%symbol       FALSE TRUE ERROR
+%symbol       NOT PROP
+%symbol       IMPLIES EQUIV AND OR 
+%symbol       EQ NE LT GT LE GE CONTAINS
+%symbol       ADD SUB MATMUL MUL TRUEDIV MOD
+%symbol       LPAR RPAR LBRACE RBRACE LBRACKET RBRACKET COMMA DOT SEP
+%symbol       COLON SEMICOLON 
+%symbol   { firstorder::formula }   Formula1q Formula2q Formula3q Formula4q Formula5q
+%symbol   { firstorder::formula }   Formula1 Formula2 Formula3 Formula4 Formula5
+%symbol   { firstorder::formula }   Atom
+%symbol   { firstorder::formula }   Terms Term Term2 Term3 
+%symbol       { identifier }        Identifier FuncName
+%symbol       { util::dyn_vector< identifier > }  FuncNames
+%symbol       { util::dyn_vector< firstorder::varwithsort > } BoundVars
+%symbol   { util::dyn_vector< std::string > } Variables 
+%symbol   { firstorder::sort }      Sort
+%symbol   { firstorder::pattern }   Sorts
+%symbol   { std::string }           OptComment
+%symbol       WHITESPACE COMMENT
+%symbol       READERROR EOF
+%symbol   { std::string }  BADSYMBOL STRING ID
+
+%infotype { location }
+
+%symbolcode_h { #include "location.h" }
+%symbolcode_h { #include "firstorder/formula.h" }
+%symbolcode_h { #include "firstorder/functype.h" }
+
+%parsercode_h { #include "tokenizer.h" }
+
+%parsercode_h { #include "error_report.h" }
+%parsercode_h { #include "firstorder/signature.h" }
+%parsercode_h { #include "firstorder/context.h" }
+%parsercode_h { #include "firstorder/bindingstack.h" } 
+
+
+%parsercode_cpp {
+
+firstorder::sort makesort( const identifier& id ) 
+{
+   using namespace firstorder;
+
+   std::cout << "making a sort from " << id << "\n";
+
+   if( id. size( ) == 1 )
+   {
+      const auto& s = *( id. begin( ));
+      if( s == "T" )
+         return sort_truthval;
+      if( s == "O" )
+         return sort_obj;
+      if( s == "S" )
+         return sort_set;
+   }
+
+   return sort( sort_named, id );
+}
+
+}
+
+%symbolspace parsing
+%parserspace parsing
+
+%parameter { tokenizer }                   tok
+%parameter { firstorder::signature }       sig
+%parameter { firstorder::context }         ctxt 
+%parameter { firstorder::context::usage }  use
+%parameter { error_report }                errors
+
+%source { tok. get( ); }
+
+%rules
+
+Input => 
+   | Input SORTS       SortDecls
+   | Input FUNCTIONS   FunctionDecls
+   | Input FormClass   Formulas 
+   ;
+
+FormClass => ASSUMPTIONS { use = firstorder::context::assumption; } 
+   | THEOREMS            { use = firstorder::context::theorem; } 
+   | TYPEFORMS           { use = firstorder::context::typeform; } 
+   | TYPEHINTS           { use = firstorder::context::typehint; }
+   ;
+
+SortDecls =>
+   | SortDecls Sort : s SEMICOLON 
+   {
+      if( s. option_is_prim( ))
+      {
+         errors. extend( );
+         errors. last( ) << "cannot declare sort " << s;
+         errors. last( ) << " (it already is a primitive sort)";
+      }
+      else
+         sig. declare_sort(s);
+   }
+   ;
+
+Sort => Identifier : id  { return makesort(id); } 
+;
+
+Sorts => Sort : s  
+   { auto pat = firstorder::pattern( ); pat. push_back(s); return pat; }
+   | Sorts : pat COMMA Sort : s { pat. push_back(s); return pat; }
+   ;
+
+FunctionDecls =>
+   | FunctionDecls FuncNames:names COLON Sort : res SEMICOLON
+{
+   for( const auto& n : names )
+   {
+      auto s = sig. declare_function( n, {}, res ). second;
+      if( s != res )
+      {
+         errors. extend( );
+         errors. last( ) << "redeclaration of constant " << n;
+         errors. last( ) << " with different sort ";
+         errors. last( ) << "(previous result was " << s;
+         errors. last( ) << ", now it is " << res << ")";
+      }
+   }
+}
+
+   | FunctionDecls FuncNames:names COLON Sort:res LPAR Sorts:pat RPAR SEMICOLON
+{
+   for( const auto& n : names )
+   {
+      auto s = sig. declare_function( n, pat, res ). second;
+      if( s != res )
+      {
+         errors. extend( );
+         errors. last( ) << "redeclaration of " << n << pat;
+         errors. last( ) << " with different result ";
+         errors. last( ) << "(previous was " << s << ", now it is " << res << ")"; 
+      }
+   } 
+}
+   ;
+
+FuncNames => FuncName : name 
+{ 
+   util::dyn_vector< identifier > res; 
+   res. push_back( name ); 
+   return res; 
+} 
+   | FuncNames :names COMMA FuncName : name
+{
+   names. push_back( name );
+   return std::move( names );
+}
+   ;
+
+FuncName => 
+   Identifier : id  { return id; }
+   | EQ             { return identifier( ) + "=="; }
+   | NE             { return identifier( ) + "!="; }
+   | LT             { return identifier( ) + "<"; }
+   | GT             { return identifier( ) + ">"; }
+   | LE             { return identifier( ) + "<="; }
+   | GE             { return identifier( ) + ">="; }
+
+   | ADD            { return identifier( ) + "+" ; }
+   | SUB            { return identifier( ) + "-" ; }
+   | MATMUL         { return identifier( ) + "@" ; }
+   | MUL            { return identifier( ) + "*"; }
+   | TRUEDIV        { return identifier( ) + "/"; }
+   | MOD            { return identifier( ) + "%"; } 
+
+   ;
+ 
+Formulas => 
+   | Formulas Formula1q:f OptComment:comm SEMICOLON { ctxt. append( use, f, comm ); }
+   ;
+
+// If the name ends in 'q', that means that a quantifier is possible.
+
+Formula1q => 
+Formula2 : left EQUIV Formula2q : right
+{
+   return firstorder::formula( firstorder::fol_equiv, left, right ); 
+}
+| Formula2q : f { return std::move(f); } 
+;
+
+Formula2q => Formula3:left IMPLIES Formula2q:right         { return firstorder::formula( firstorder::fol_implies, left, right ); }
+| LBRACE Formula1q:left RBRACE IMPLIES Formula2q:right     { return firstorder::formula( firstorder::fol_lazy_implies, left, right ); } 
+| Formula3q:f                                              { return std::move(f); }
+;
+
+Formula2 => Formula3:left IMPLIES Formula2:right           { return firstorder::formula( firstorder::fol_implies, left, right ); } 
+| LBRACE Formula1q:left RBRACE IMPLIES Formula2:right      { return firstorder::formula( firstorder::fol_lazy_implies, left, right ); } 
+| Formula3:f                                               { return std::move(f); } 
+;
+
+Formula3q => Formula3:left OR Formula4q:right               { return firstorder::formula( firstorder::fol_or, { left, right } ); }
+| LBRACE Formula1q:left RBRACE OR Formula4q:right           { return firstorder::formula( firstorder::fol_lazy_or, left, right ); }
+| Formula4q:f                                               { return std::move(f); }
+;
+
+Formula3 => Formula3:left OR Formula4:right               { return firstorder::formula( firstorder::fol_or, { left, right } ); } 
+| LBRACE Formula1q:left RBRACE OR Formula4:right          { return firstorder::formula( firstorder::fol_lazy_or, left, right ); } 
+| Formula4:f                                              { return std::move(f); }  
+;
+
+Formula4q => Formula4:left AND Formula5q:right            { return firstorder::formula( firstorder::fol_and, { left, right } ); }
+| LBRACE Formula1q:left RBRACE AND Formula5q:right        { return firstorder::formula( firstorder::fol_lazy_and, left, right ); }
+| Formula5q : f                                           { return std::move(f); }
+;
+
+Formula4 => Formula4:left AND Formula5:right              { return firstorder::formula( firstorder::fol_and, { left, right } ); } 
+| LBRACE Formula1q:left RBRACE AND Formula5:right         { return firstorder::formula( firstorder::fol_lazy_and, left, right ); } 
+| Formula5 : f                                            { return std::move(f); } 
+;
+
+Formula5q => PROP Formula5q : f                           { return firstorder::formula( firstorder::fol_prop, std::move(f) ); }
+| NOT Formula5q : f                                       { return firstorder::formula( firstorder::fol_not, std::move(f) ); }
+| LBRACKET BoundVars : bound RBRACKET Formula1q : body
+   { body = firstorder::formula( firstorder::fol_forall, body, 
+                                 bound. begin( ), bound. end( )); 
+     return body; } 
+|  LT BoundVars : bound GT Formula1q : body
+   { body = firstorder::formula( firstorder::fol_exists, body,
+                                 bound. begin( ), bound. end( ));
+     return body; }
+| Atom : at                                               { return std::move( at ); }
+;
+
+Formula5 => PROP Formula5 : f                            { return firstorder::formula( firstorder::fol_prop, std::move(f) ); }
+| NOT Formula5 : f                                       { return firstorder::formula( firstorder::fol_not, std::move(f) ); }
+| Atom : at                                              { return std::move( at ); }
+;
+
+Atom => FALSE { return firstorder::formula( firstorder::fol_or, {} ); } 
+| ERROR { return firstorder::formula( firstorder::fol_error ); } 
+| TRUE  { return firstorder::formula( firstorder::fol_and, {} ); }
+| Term : left EQ Term : right
+   { return firstorder::formula( firstorder::fol_apply, { left, right }, identifier( ) + "==", 0 ); }
+| Term : left NE Term : right
+   { return firstorder::formula( firstorder::fol_apply, { left, right }, identifier( ) + "!=", 0 ); }
+| Term : left GT Term : right
+   { return firstorder::formula( firstorder::fol_apply, { left, right }, identifier( ) + ">", 0 ); }
+| Term : left LT Term : right
+   { return firstorder::formula( firstorder::fol_apply, { left, right }, identifier( ) + "<", 0 ); }
+| Term : left GE Term : right
+   { return firstorder::formula( firstorder::fol_apply, { left, right }, identifier( ) + ">=", 0 ); }
+| Term : left LE Term : right
+   { return firstorder::formula( firstorder::fol_apply, { left, right }, identifier( ) + "<=", 0 ); }
+| Term : left CONTAINS Term : right
+   { return firstorder::formula( firstorder::fol_apply, { left, right }, identifier( ) + "in", 0 ); }
+| Term : t
+   { return std::move(t); } 
+; 
+
+
+Term => Term : left ADD Term2 : right 
+   { return firstorder::formula( firstorder::fol_apply,
+                                 { left, right }, identifier( ) +  "+", 0 ); }
+     |  Term : left SUB Term2 : right
+   { return firstorder::formula( firstorder::fol_apply,
+                                 { left, right }, identifier( ) +  "-", 0 ); }
+     |  Term2 : tm     { return tm; } 
+     ;
+
+
+Term2 => Term2 : left MUL Term3 : right
+   { return firstorder::formula( firstorder::fol_apply, 
+                                 { left, right }, identifier( ) +  "*", 0 ); } 
+   | Term2 : left TRUEDIV Term3 : right
+   { return firstorder::formula( firstorder::fol_apply, 
+                                 { left, right }, identifier( ) +  "/", 0 ); }
+   | Term2 : left MATMUL Term3 : right
+   { return firstorder::formula( firstorder::fol_apply, 
+                                 { left, right }, identifier( ) +  "@", 0 ); }
+   | Term2 : left MOD Term3 : right
+   { return firstorder::formula( firstorder::fol_apply, 
+                                 { left, right }, identifier( ) +  "%", 0 ); }
+   | Term3 : tm       { return tm; } 
+   ;
+
+
+Term3 => 
+SUB Term3 : tm 
+   { return firstorder::formula( firstorder::fol_apply, { tm }, 
+                                 identifier( ) + "-", 0 ); } 
+| Identifier : id                              { return firstorder::formula( firstorder::fol_apply, {}, id, 0 ); } 
+| Identifier : id LPAR Terms : tms RPAR        { tms. view_apply( ). update_ident( id ); return tms; } 
+| LPAR Formula1q:t RPAR                             { return std::move(t); } 
+;
+
+Terms => 
+Term : tm
+{ 
+   auto res = firstorder::formula( firstorder::fol_apply, { tm }, identifier( ), 0 ); 
+   return res;
+}
+| Terms : tms COMMA Term : tm
+{ tms. view_apply( ). push_back( tm ); return tms; } 
+;
+
+Identifier => ID : s         { return identifier() + s; }
+   | Identifier:id SEP ID:s  { return id + s; } 
+   ;
+
+OptComment =>                { return std::string( ); }
+   | STRING : s              { return s; }  
+   ;  
+
+BoundVars =>
+Variables: vars COLON Sort: s
+   {
+      util::dyn_vector< firstorder::varwithsort > res;
+      for( const auto& v : vars )
+         res. push_back( firstorder::varwithsort( v, s ));
+      return res;
+   }
+| BoundVars: vect COMMA Variables:vars COLON Sort: s 
+   {
+      for( const auto& v : vars )
+         vect. push_back( firstorder::varwithsort( v, s ));
+      return vect;
+   }
+   ;
+
+Variables => ID : var
+{
+   util::dyn_vector< std::string > res;
+   res. push_back( var );
+   return res;
+}
+   | Variables : vars COMMA ID : var
+{
+   vars. push_back( var );
+   return std::move( vars );
+}
+   ;
+
+
