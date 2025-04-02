@@ -1,4 +1,4 @@
-#
+@
 struct Seq := 
    0 : O, 
    succ : O( O );

@@ -42,7 +42,7 @@ parsing::tokenizer::buildclassifier()
    cls.insert(just(':'), parsing::symbolval::sym_COLON);
    cls.insert(just(';'), parsing::symbolval::sym_SEMICOLON);
 
-   cls.insert(just('#'), parsing::symbolval::sym_EOF);
+   cls.insert(just('@'), parsing::symbolval::sym_EOF);
    //
 
    // Keywords:
