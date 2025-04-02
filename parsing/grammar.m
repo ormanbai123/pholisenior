@@ -19,7 +19,7 @@
 %symbol{} EOF FILEBAD WHITESPACE COMMENT EMPTY
 %symbol{} LPAR RPAR LBRACE RBRACE LBRACKET RBRACKET 
 %symbol{} EQ LT GT LT_EQ GT_EQ ASSIGN
-%symbol{} AND OR IMPLY NOT IFF
+%symbol{} AND OR IMPLY NOT IFF PROP
 %symbol{} COLON SEMICOLON COMMA DOT 
 
 %symbol{} FORALL EXISTS
@@ -164,9 +164,11 @@ lazy_and => LBRACE term RBRACE AND quantifier_expr lazy_and
          ;
 
 not_expr => NOT not_expr 
+          | PROP not_expr
           | member_apply_expr
           | apply_expr
           | NOT quantifier_expr not_expr
+          | PROP quantifier_expr not_expr
           | LPAR term RPAR
           ;
 
