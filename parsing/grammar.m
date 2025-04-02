@@ -134,18 +134,18 @@ iff_expr => iff_expr IFF quantifier_expr implication_expr
           | implication_expr 
           ;
 
-implication_expr => implication_expr IMPLY quantifier_expr or_expr
-                  | implication_expr IMPLY or_expr
+implication_expr => or_expr IMPLY quantifier_expr implication_expr
+                  | or_expr IMPLY implication_expr
                   | or_expr
                   ;
 
-or_expr => and_expr OR quantifier_expr or_expr 
-         | and_expr OR or_expr 
+or_expr => or_expr OR quantifier_expr and_expr
+         | or_expr OR and_expr
          | and_expr
          ;
 
-and_expr => lazy_implication AND quantifier_expr and_expr
-          | lazy_implication AND and_expr 
+and_expr => and_expr AND quantifier_expr lazy_implication
+          | and_expr AND lazy_implication
           | lazy_implication 
           ;
 
