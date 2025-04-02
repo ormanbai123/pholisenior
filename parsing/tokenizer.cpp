@@ -28,8 +28,6 @@ parsing::tokenizer::buildclassifier()
    cls.insert(just('='), parsing::symbolval::sym_EQ);
    cls.insert(just('<'), parsing::symbolval::sym_LT);
    cls.insert(just('>'), parsing::symbolval::sym_GT);
-   cls.insert(word("<="), parsing::symbolval::sym_LT_EQ);
-   cls.insert(word(">="), parsing::symbolval::sym_GT_EQ);
 
    cls.insert(just('!'), parsing::symbolval::sym_NOT);
    cls.insert(just('&'), parsing::symbolval::sym_AND);
