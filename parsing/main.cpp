@@ -9,14 +9,12 @@
 int main () {
 
     logic::beliefstate blfs;
-    evaluator eval(blfs);
-
 
     parsing::tokenizer tok(lexing::filereader(&std::cin, "std::cin"));
 
     tok.test();
 
-    auto prs = parsing::parser(tok, eval);
+    auto prs = parsing::parser(tok, blfs);
     prs.maxrecovery = 1000000;
     //prs.debug = 1;
     

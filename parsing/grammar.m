@@ -44,13 +44,14 @@
 %symbolspace parsing
 %parserspace parsing
 
+%parsercode_h { #include "./logic/beliefstate.h" }
 %parsercode_h { #include "tokenizer.h" }
 %parsercode_h { #include "evaluator.h" }
 
 %infotype {location}
 
 %parameter {tokenizer}              tok
-%parameter {evaluator}              eval
+%parameter { logic::beliefstate }                  blfs
 
 %source { tok.read(); }
 
@@ -63,7 +64,7 @@ Session =>
          | Session _recover_ SEMICOLON
          ;
 
-Statement => struct_specifier : strct { eval.add_belief(strct); }
+Statement => struct_specifier : strct { blfs.append(std::move(strct)); }
            | def_specifier
            ;
 
