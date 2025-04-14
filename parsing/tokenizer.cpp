@@ -25,7 +25,7 @@ parsing::tokenizer::buildclassifier()
    cls.insert(just('{'), parsing::symbolval::sym_LBRACE);
 
    cls.insert(word(":="), parsing::symbolval::sym_ASSIGN);
-   cls.insert(just('='), parsing::symbolval::sym_EQ);
+   cls.insert(word("=="), parsing::symbolval::sym_EQ);
    cls.insert(just('<'), parsing::symbolval::sym_LT);
    cls.insert(just('>'), parsing::symbolval::sym_GT);
 
