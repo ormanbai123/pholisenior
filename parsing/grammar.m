@@ -203,11 +203,6 @@ apply_expr => IDENTIFIER:s LPAR apply_args RPAR {
 				// return logic::term(logic::op_apply, ident);
 				return logic::term(logic::op_unchecked, identifier() + s.c_str());
 			}
-            | IDENTIFIER:s LPAR RPAR {
-				auto ident = logic::term(logic::op_unchecked, identifier() + s.c_str());
-				//return logic::term(logic::op_apply, ident);
-				return logic::term(logic::op_unchecked, identifier() + s.c_str());
-			}
             ; 
 
 member_apply_expr => member_apply_expr:trm DOT IDENTIFIER { return trm; } // TODO fix this
