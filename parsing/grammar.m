@@ -16,6 +16,10 @@
 %symbol{std::pair<std::vector<std::string>, logic::type>} identifiers_colon_type
 %symbol{} STRUCT DEF FRM
 
+%symbol{std::vector<logic::vartype>} vartypes
+%symbol{std::pair<logic::selector, std::vector<logic::vartype>>} exist forall 
+%symbol{std::stack<std::pair<logic::selector, std::vector<logic::vartype>>>}quantifiers
+
 %symbol{} EOF FILEBAD WHITESPACE COMMENT EMPTY
 %symbol{} LPAR RPAR LBRACE RBRACE LBRACKET RBRACKET 
 %symbol{} EQ LT GT ASSIGN
@@ -33,6 +37,7 @@
 
 %symbolcode_h { #include "location.h" }
 %symbolcode_h { #include <vector> }
+%symbolcode_h { #include <functional> }
 %symbolcode_h { #include <string> }
 %symbolcode_h { #include <stack> }
 %symbolcode_h { #include "./logic/type.h" }
@@ -95,6 +100,15 @@ func => type:t LPAR type_list:v RPAR {
 type_list => type:t {return {t};}
            | type_list:v COMMA type:t {v.push_back(t); return v;};
 
+vartypes => identifiers_colon_type:ict 
+{
+    std::vector<logic::vartype> vars;
+    for (auto var : ict.first) {
+      vars.emplace_back(var, ict.second);
+    }
+    return vars;
+};
+
 //-----------------------structs---------------------------------
 
 struct_specifier => STRUCT IDENTIFIER:s ASSIGN idents_type_list:v  
@@ -140,7 +154,9 @@ term => iff_expr:trm { return trm; }
       ;  
 
 iff_expr => iff_expr:trm_left IFF implication_expr:trm_right { return logic::term(logic::op_equiv, trm_left, trm_right); }
+          | iff_expr:trm_left IFF quantifiers implication_expr:trm_right { return logic::term(logic::op_equiv, trm_left, trm_right); }
           | implication_expr:trm { return trm; }
+          | quantifiers implication_expr:trm { return trm; }
           ;
 
 implication_expr => or_expr:trm_left IMPLY implication_expr:trm_right { return logic::term(logic::op_implies, trm_left, trm_right); }
@@ -155,15 +171,15 @@ and_expr => and_expr:trm_left AND lazy_implication:trm_right { return logic::ter
           | lazy_implication:trm { return trm; }
           ;
 
-lazy_implication => LBRACKET identifiers_colon_type RBRACKET LBRACE term:trm_left RBRACE IMPLY lazy_or:trm_right { return logic::term(logic::op_lazy_implies, trm_left, trm_right); } // TODO change this
+lazy_implication => forall LBRACE term:trm_left RBRACE IMPLY lazy_or:trm_right { return logic::term(logic::op_lazy_implies, trm_left, trm_right); } // TODO change this
                   | lazy_or:trm { return trm; }
                   ;
 
-lazy_or => LT identifiers_colon_type GT LBRACE term:trm_left RBRACE OR lazy_or:trm_right { return logic::term(logic::op_lazy_or, trm_left, trm_right); } // TODO change this
+lazy_or => exist LBRACE term:trm_left RBRACE OR lazy_or:trm_right { return logic::term(logic::op_lazy_or, trm_left, trm_right); } // TODO change this
          | lazy_and:trm { return trm; }
          ;
 
-lazy_and => LT identifiers_colon_type GT LBRACE term:trm_left RBRACE AND lazy_and:trm_right { return logic::term(logic::op_lazy_and, trm_left, trm_right); } // TODO change this
+lazy_and => exist LBRACE term:trm_left RBRACE AND lazy_and:trm_right { return logic::term(logic::op_lazy_and, trm_left, trm_right); } // TODO change this
          | not_expr:trm { return trm; }
          ;
 
@@ -191,5 +207,26 @@ member_apply_expr => member_apply_expr:trm DOT IDENTIFIER { return trm; } // TOD
                    | IDENTIFIER:s { return logic::term(logic::op_unchecked, identifier() + s.c_str()); }
                    ;
 
+quantifiers => forall:q 
+             {
+                std::stack<std::pair<logic::selector, std::vector<logic::vartype>>> st;
+                st.push(q);
+                return st;
+             }
+             | quantifiers:qst forall:q {qst.push(q); return qst;}
+             | exist:q 
+             {
+                std::stack<std::pair<logic::selector, std::vector<logic::vartype>>> st;
+                st.push(q);
+                return st;
+             }
+             | quantifiers:qst exist:q {qst.push(q); return qst;}
+             ;
+
+forall => LBRACKET vartypes:vars RBRACKET {return {logic::selector::op_forall, vars};}
+         ;
+
+exist => LT vartypes:vars GT {return {logic::selector::op_exists, vars};}
+       ;
+
 %end
- 
