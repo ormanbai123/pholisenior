@@ -37,7 +37,6 @@
 
 %symbolcode_h { #include "location.h" }
 %symbolcode_h { #include <vector> }
-%symbolcode_h { #include <functional> }
 %symbolcode_h { #include <string> }
 %symbolcode_h { #include <stack> }
 %symbolcode_h { #include "./logic/type.h" }
@@ -46,6 +45,7 @@
 %symbolcode_h { #include <typeinfo> }
 %symbolcode_h { #include "./logic/belief.h"}
 %symbolcode_h { #include "./logic/beliefstate.h"}
+%symbolcode_h { #include "./parsing/util.cpp"}
 
 %symbolspace parsing
 %parserspace parsing
@@ -150,8 +150,8 @@ args_seq => args_seq:st LPAR idents_type_list:v RPAR {st.push(v); return st;}
 
 //-----------------------terms---------------------------------
 
-term => quantifiers iff_expr:trm { return trm; }
-		| iff_expr:trm { return trm; }
+term => quantifiers: st iff_expr: trm { return QuantifiedTerm(st, trm); }
+		  | iff_expr:trm { return trm; }
       ;  
 
 iff_expr => iff_expr:trm_left IFF implication_expr:trm_right { return logic::term(logic::op_equiv, trm_left, trm_right); }
@@ -160,17 +160,17 @@ iff_expr => iff_expr:trm_left IFF implication_expr:trm_right { return logic::ter
           ;
 
 implication_expr => or_expr:trm_left IMPLY quantifiers implication_expr:trm_right { return logic::term(logic::op_implies, trm_left, trm_right); }
-					| or_expr:trm_left IMPLY implication_expr:trm_right { return logic::term(logic::op_implies, trm_left, trm_right); }
+					        | or_expr:trm_left IMPLY implication_expr:trm_right { return logic::term(logic::op_implies, trm_left, trm_right); }
                   | or_expr:trm { return trm; }
                   ;
 
 or_expr => or_expr:trm_left OR quantifiers and_expr:trm_right { return logic::term(logic::op_or, trm_left, trm_right); }
-		| or_expr:trm_left OR and_expr:trm_right { return logic::term(logic::op_or, trm_left, trm_right); }
+		     | or_expr:trm_left OR and_expr:trm_right { return logic::term(logic::op_or, trm_left, trm_right); }
          | and_expr:trm { return trm; }
          ;
 
 and_expr => and_expr:trm_left AND quantifiers lazy_implication:trm_right { return logic::term(logic::op_and, trm_left, trm_right); }
-		| and_expr:trm_left AND lazy_implication:trm_right { return logic::term(logic::op_and, trm_left, trm_right); }
+		      | and_expr:trm_left AND lazy_implication:trm_right { return logic::term(logic::op_and, trm_left, trm_right); }
           | lazy_implication:trm { return trm; }
           ;
 
@@ -188,8 +188,8 @@ lazy_and => exist LBRACE term:trm_left RBRACE AND lazy_and:trm_right { return lo
 
 not_expr => NOT not_expr:trm { return logic::term( logic::op_not, trm ); }
           | PROP not_expr:trm { return logic::term( logic::op_prop, trm ); }
-		| NOT quantifiers not_expr:trm { return trm; } // TODO finish action code.
-		| PROP quantifiers not_expr:trm { return trm; } // TODO finish action code.
+		      | NOT quantifiers not_expr:trm { return trm; } // TODO finish action code.
+		      | PROP quantifiers not_expr:trm { return trm; } // TODO finish action code.
           | member_apply_expr:trm { return trm; }
           | apply_expr:trm { return trm; }
           | LPAR term:trm RPAR { return trm; }
