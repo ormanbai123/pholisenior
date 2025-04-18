@@ -45,7 +45,7 @@
 %symbolcode_h { #include <typeinfo> }
 %symbolcode_h { #include "./logic/belief.h"}
 %symbolcode_h { #include "./logic/beliefstate.h"}
-%symbolcode_h { #include "./parsing/util.cpp"}
+%symbolcode_h { #include "./parsing/util.h"}
 
 %symbolspace parsing
 %parserspace parsing
