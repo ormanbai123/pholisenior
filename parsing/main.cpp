@@ -26,7 +26,7 @@ int main () {
     }
 
 
-    //std::cout << "\n\n" << blfs << "\n";
+    std::cout << "\n\n" << blfs << "\n";
 
     return 0;
 }

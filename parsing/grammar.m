@@ -134,19 +134,32 @@ struct_specifier => STRUCT IDENTIFIER:s ASSIGN idents_type_list:v
 
 //-----------------------defs---------------------------------
 
-def_specifier => DEF IDENTIFIER:s args_seq ASSIGN term:trm {
+def_specifier => DEF IDENTIFIER:s args_seq:as ASSIGN term:trm {
 	std::cout << "Definition!\n";
 
 	// TODO change this.
 	using namespace logic;
 
-	auto T = type( type_truthval );
-	auto tp = type(type_func, T, {type(type_obj)});
+	auto tp = type( type_truthval );
+	auto body = trm;
 
-	return belief(bel_def, identifier() + s, trm, tp);
+	while (!as.empty()) {
+		auto vars = as.top();
+		body = logic::term(op_lambda, body, vars.begin(), vars.end());
+
+		std::vector<logic::type> vars_type;
+		for (auto& v: vars) {
+			vars_type.push_back(v.tp);
+		}
+
+		tp = type(type_func, tp, vars_type.begin(), vars_type.end());
+		as.pop();
+	}
+
+	return belief(bel_def, identifier() + s, body, tp);
 };
 
-args_seq => args_seq:st LPAR vartypes:vars RPAR {st.push(vars); return st;}
+args_seq => LPAR vartypes:vars RPAR args_seq:st {st.push(vars); return st;}
 		  | LPAR vartypes:vars RPAR {
 			  std::stack<std::vector<logic::vartype>> st; st.push(vars); return st;
 		  }
