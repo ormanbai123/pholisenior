@@ -11,5 +11,6 @@
 
 
 logic::term QuantifiedTerm (std::stack<std::pair<logic::selector, std::vector<logic::vartype>>> quantifiers, logic::term term);
+logic::term QuantifiedTerm (std::pair<logic::selector, std::vector<logic::vartype>> quantifier, logic::term term);
 
 #endif

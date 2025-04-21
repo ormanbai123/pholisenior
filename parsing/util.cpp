@@ -8,3 +8,9 @@ logic::term QuantifiedTerm (std::stack<std::pair<logic::selector, std::vector<lo
     }
     return term;
 }
+
+logic::term QuantifiedTerm (std::pair<logic::selector, std::vector<logic::vartype>> quantifier, logic::term term) {
+    auto& [sel, vars] = quantifier;
+    term = logic::term(sel, term, vars.begin(), vars.end());
+    return term;
+}
