@@ -56,8 +56,8 @@
 
 %infotype {location}
 
-%parameter {tokenizer}              tok
-%parameter { logic::beliefstate }                  blfs
+%parameter {tokenizer} tok
+%parameter { logic::beliefstate } blfs
 %parameter {std::unordered_map<std::string, long long unsigned int>} db_map
 %parameter {long long unsigned int} counter
 
@@ -79,19 +79,25 @@ Statement =>
 
 idents_type_list =>
 	identifiers_colon_type:ict { return {ict}; }
-	| identifiers_colon_type:ict COMMA idents_type_list:v { v.push_back(ict); return v; }
+	| identifiers_colon_type:ict COMMA idents_type_list:v {
+		v.push_back(ict);
+		return v;
+	}
 	;
 
-identifiers_colon_type => identifier_list:v COLON type:t {return {v, t};};
+identifiers_colon_type => identifier_list:v COLON type:t { return {v, t}; };
 
 identifier_list =>
 	IDENTIFIER:s { return {s}; }
-	| IDENTIFIER:s COMMA identifier_list:v { v.push_back(s); return v; }
+	| IDENTIFIER:s COMMA identifier_list:v {
+		v.push_back(s);
+		return v;
+	}
 	;
 
 type =>
 	IDENTIFIER:s {
-		return logic::type( logic::type_unchecked, identifier() + s );
+		return logic::type(logic::type_unchecked, identifier() + s);
 	}
 	| func:t { return t; }
 	;
@@ -99,12 +105,12 @@ type =>
 
 func =>
 	type:t LPAR type_list:v RPAR {
-		return logic::type (logic::type_func, t, v.begin(), v.end());
+		return logic::type(logic::type_func, t, v.begin(), v.end());
 	}
 	;
 
 type_list =>
-	type:t {return {t};}
+	type:t { return {t}; }
 	| type_list:v COMMA type:t {
 		v.push_back(t);
 		return v;
@@ -136,9 +142,9 @@ struct_specifier =>
 		std::cout << "STRUCT!\n";
 
 		logic::structdef strctseq;
-		for (auto it = v.end(); it-- != v.begin(); ) {
-			for (auto jt = it -> first.end(); jt-- != it -> first.begin(); ) {
-				strctseq.append(identifier() + (*jt), it -> second);
+		for (auto it = v.end(); it-- != v.begin();) {
+			for (auto jt = it->first.end(); jt-- != it->first.begin();) {
+				strctseq.append(identifier() + (*jt), it->second);
 			}
 		}
 		return logic::belief(logic::bel_struct, identifier() + s, strctseq);
@@ -153,7 +159,7 @@ def_specifier =>
 
 		using namespace logic;
 
-		auto tp = type( type_truthval );
+		auto tp = type(type_truthval);
 		auto body = trm;
 
 		while (!as.empty()) {
@@ -187,7 +193,8 @@ args_seq =>
 		return st;
 	}
 	| LPAR RPAR {
-		std::stack<std::vector<logic::vartype>> st; return st;
+		std::stack<std::vector<logic::vartype>> st;
+		return st;
 	}
 	;
 
@@ -260,8 +267,8 @@ lazy_and =>
 	;
 
 not_expr =>
-	NOT not_expr:trm { return logic::term( logic::op_not, trm ); }
-	| PROP not_expr:trm { return logic::term( logic::op_prop, trm ); }
+	NOT not_expr:trm { return logic::term(logic::op_not, trm); }
+	| PROP not_expr:trm { return logic::term(logic::op_prop, trm); }
 	| NOT quantifiers:qntf not_expr:trm { return QuantifiedTerm(qntf, trm); }
 	| PROP quantifiers:qntf not_expr:trm { return QuantifiedTerm(qntf, trm); }
 	| member_apply_expr:trm { return trm; }
