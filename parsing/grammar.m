@@ -30,7 +30,7 @@
 
 %symbol{ std::string } SCANERROR
 
-%symbol{} apply_args
+%symbol{std::vector<logic::term>} apply_args
 %symbol{logic::term} apply_expr member_apply_expr
 
 %symbol{} iff_expr_q implication_expr_q or_expr_q and_expr_q not_expr_q
@@ -230,15 +230,13 @@ not_expr => NOT not_expr:trm { return logic::term( logic::op_not, trm ); }
           | LPAR term:trm RPAR { return trm; }
           ;
 
-apply_args => term COMMA apply_args {}
-            | term {}
+apply_args => term:t COMMA apply_args:v { v.push_back(t); return v; }
+            | term:t { return {t}; }
             ;
 
-apply_expr => IDENTIFIER:s LPAR apply_args RPAR {
-				// TODO Fix this
-				auto ident = logic::term(logic::op_unchecked, identifier() + s.c_str());
-				// return logic::term(logic::op_apply, ident);
-				return logic::term(logic::op_unchecked, identifier() + s.c_str());
+apply_expr => IDENTIFIER:s LPAR apply_args:v RPAR {
+				auto f = logic::term(logic::op_unchecked, identifier() + s.c_str());
+				return logic::term(logic::op_apply, f, v.begin(), v.end());
 			}
             ; 
 
