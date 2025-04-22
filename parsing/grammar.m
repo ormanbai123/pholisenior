@@ -151,7 +151,6 @@ def_specifier =>
 	DEF IDENTIFIER:s args_seq:as ASSIGN term:trm {
 		std::cout << "Definition!\n";
 
-		// TODO change this.
 		using namespace logic;
 
 		auto tp = type( type_truthval );
@@ -169,6 +168,9 @@ def_specifier =>
 			tp = type(type_func, tp, vars_type.begin(), vars_type.end());
 			as.pop();
 		}
+
+		db_map.clear();
+		counter = 0;
 
 		return belief(bel_def, identifier() + s, body, tp);
 	}
