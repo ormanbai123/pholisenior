@@ -68,240 +68,289 @@
 //-------------------------common--------------------------------
 
 Session => 
-	     | Session Statement SEMICOLON
-         | Session _recover_ SEMICOLON
-         ;
+	| Session Statement SEMICOLON
+	| Session _recover_ SEMICOLON
+	;
 
-Statement => struct_specifier : strct { blfs.append(std::move(strct)); }
-           | def_specifier : def { blfs.append(std::move(def)); }
-           ;
+Statement =>
+	struct_specifier : strct { blfs.append(std::move(strct)); }
+	| def_specifier : def { blfs.append(std::move(def)); }
+	;
 
-idents_type_list => identifiers_colon_type:ict { return {ict}; }
-		      	  | identifiers_colon_type:ict COMMA idents_type_list:v 
-				      { v.push_back(ict); return v; }
-			      ;
+idents_type_list =>
+	identifiers_colon_type:ict { return {ict}; }
+	| identifiers_colon_type:ict COMMA idents_type_list:v { v.push_back(ict); return v; }
+	;
 
 identifiers_colon_type => identifier_list:v COLON type:t {return {v, t};};
 
-identifier_list => IDENTIFIER:s            { return {s}; }
-  | IDENTIFIER:s COMMA identifier_list:v   { v.push_back(s); return v; }
-  ;
+identifier_list =>
+	IDENTIFIER:s { return {s}; }
+	| IDENTIFIER:s COMMA identifier_list:v { v.push_back(s); return v; }
+	;
 
-type => IDENTIFIER:s 
-      {
-			return logic::type( logic::type_unchecked, identifier() + s );
-	  }
-      | func:t { return t; }
-	  ;
+type =>
+	IDENTIFIER:s {
+		return logic::type( logic::type_unchecked, identifier() + s );
+	}
+	| func:t { return t; }
+	;
 
 
-func => type:t LPAR type_list:v RPAR {
-			return logic::type (logic::type_func, t, v.begin(), v.end());
-		}; 
+func =>
+	type:t LPAR type_list:v RPAR {
+		return logic::type (logic::type_func, t, v.begin(), v.end());
+	}
+	;
 
-type_list => type:t {return {t};}
-           | type_list:v COMMA type:t {v.push_back(t); return v;};
+type_list =>
+	type:t {return {t};}
+	| type_list:v COMMA type:t {
+		v.push_back(t);
+		return v;
+	}
+	;
 
-vartypes => identifiers_colon_type:ict 
-          {
-            std::vector<logic::vartype> vars;
-            for (auto var : ict.first) {
-              vars.emplace_back(var, ict.second);
-			  db_map[var] = counter++;
-            }
-            return vars;
-          }
-          | vartypes:vars COMMA identifiers_colon_type:ict
-          {
-            for (auto var : ict.first) {
-              vars.emplace_back(var, ict.second);
-			  db_map[var] = counter++;
-            }
-            return vars;
-          }
-;
+vartypes =>
+	identifiers_colon_type:ict {
+		std::vector<logic::vartype> vars;
+		for (auto var : ict.first) {
+			vars.emplace_back(var, ict.second);
+			db_map[var] = counter++;
+		}
+		return vars;
+	}
+	| vartypes:vars COMMA identifiers_colon_type:ict {
+		for (auto var : ict.first) {
+			vars.emplace_back(var, ict.second);
+			db_map[var] = counter++;
+		}
+		return vars;
+	}
+	;
 
 //-----------------------structs---------------------------------
 
-struct_specifier => STRUCT IDENTIFIER:s ASSIGN idents_type_list:v  
-{
-	std::cout << "STRUCT!\n";
+struct_specifier =>
+	STRUCT IDENTIFIER:s ASSIGN idents_type_list:v {
+		std::cout << "STRUCT!\n";
 
-    logic::structdef strctseq;
-    for (auto it = v.end(); it-- != v.begin(); ) {
-    	for (auto jt = it -> first.end(); jt-- != it -> first.begin(); ) {
-        	strctseq.append(identifier() + (*jt), it -> second);
-       	}
-    } 
-    return logic::belief(logic::bel_struct, identifier() + s, strctseq);
-}; 
+		logic::structdef strctseq;
+		for (auto it = v.end(); it-- != v.begin(); ) {
+			for (auto jt = it -> first.end(); jt-- != it -> first.begin(); ) {
+				strctseq.append(identifier() + (*jt), it -> second);
+			}
+		}
+		return logic::belief(logic::bel_struct, identifier() + s, strctseq);
+	}
+	;
 
 //-----------------------defs---------------------------------
 
-def_specifier => DEF IDENTIFIER:s args_seq:as ASSIGN term:trm {
-	std::cout << "Definition!\n";
+def_specifier =>
+	DEF IDENTIFIER:s args_seq:as ASSIGN term:trm {
+		std::cout << "Definition!\n";
 
-	// TODO change this.
-	using namespace logic;
+		// TODO change this.
+		using namespace logic;
 
-	auto tp = type( type_truthval );
-	auto body = trm;
+		auto tp = type( type_truthval );
+		auto body = trm;
 
-	while (!as.empty()) {
-		auto vars = as.top();
-		body = logic::term(op_lambda, body, vars.begin(), vars.end());
+		while (!as.empty()) {
+			auto vars = as.top();
+			body = logic::term(op_lambda, body, vars.begin(), vars.end());
 
-		std::vector<logic::type> vars_type;
-		for (auto& v: vars) {
-			vars_type.push_back(v.tp);
+			std::vector<logic::type> vars_type;
+			for (auto& v: vars) {
+				vars_type.push_back(v.tp);
+			}
+
+			tp = type(type_func, tp, vars_type.begin(), vars_type.end());
+			as.pop();
 		}
 
-		tp = type(type_func, tp, vars_type.begin(), vars_type.end());
-		as.pop();
+		return belief(bel_def, identifier() + s, body, tp);
 	}
+	;
 
-	return belief(bel_def, identifier() + s, body, tp);
-};
-
-args_seq => LPAR vartypes:vars RPAR args_seq:st {st.push(vars); return st;}
-		  | LPAR vartypes:vars RPAR {
-			  std::stack<std::vector<logic::vartype>> st; st.push(vars); return st;
-		  }
-		  | LPAR RPAR {
-		      std::stack<std::vector<logic::vartype>> st; return st;
-		  };
+args_seq =>
+	LPAR vartypes:vars RPAR args_seq:st {
+		st.push(vars);
+		return st;
+	}
+	| LPAR vartypes:vars RPAR {
+		std::stack<std::vector<logic::vartype>> st;
+		st.push(vars);
+		return st;
+	}
+	| LPAR RPAR {
+		std::stack<std::vector<logic::vartype>> st; return st;
+	}
+	;
 
 //-----------------------terms---------------------------------
 
-term => quantifiers:qntf iff_expr: trm { return QuantifiedTerm(qntf, trm); }
-		  | iff_expr:trm { return trm; }
-      ;  
+term =>
+	quantifiers:qntf iff_expr: trm { return QuantifiedTerm(qntf, trm); }
+	| iff_expr:trm { return trm; }
+	;
 
-iff_expr => iff_expr:trm_left IFF implication_expr:trm_right { return logic::term(logic::op_equiv, trm_left, trm_right); }
-          | iff_expr:trm_left IFF quantifiers:qntf implication_expr:trm_right {
-				return logic::term(logic::op_equiv, trm_left, QuantifiedTerm(qntf, trm_right));
-			}
-          | implication_expr:trm { return trm; }
-          ;
-
-implication_expr => or_expr:trm_left IMPLY quantifiers:qntf implication_expr:trm_right {
-	return logic::term(logic::op_implies, trm_left, QuantifiedTerm(qntf, trm_right));
-}
-					        | or_expr:trm_left IMPLY implication_expr:trm_right { return logic::term(logic::op_implies, trm_left, trm_right); }
-                  | or_expr:trm { return trm; }
-                  ;
-
-or_expr => or_expr:trm_left OR quantifiers:qntf and_expr:trm_right {
-	return logic::term(logic::op_or, trm_left, QuantifiedTerm(qntf, trm_right));
-}
-		     | or_expr:trm_left OR and_expr:trm_right { return logic::term(logic::op_or, trm_left, trm_right); }
-         | and_expr:trm { return trm; }
-         ;
-
-and_expr => and_expr:trm_left AND quantifiers:qntf lazy_implication:trm_right {
-	return logic::term(logic::op_and, trm_left, QuantifiedTerm(qntf, trm_right));
-}
-		      | and_expr:trm_left AND lazy_implication:trm_right { return logic::term(logic::op_and, trm_left, trm_right); }
-          | lazy_implication:trm { return trm; }
-          ;
-
-lazy_implication => forall:qntf LBRACE term:trm_left RBRACE IMPLY lazy_or:trm_right {
-	return QuantifiedTerm(qntf, logic::term(logic::op_lazy_implies, trm_left, trm_right));
-}
-                  | lazy_or:trm { return trm; }
-                  ;
-
-lazy_or => exist:qntf LBRACE term:trm_left RBRACE OR lazy_or:trm_right {
-	return QuantifiedTerm(qntf, logic::term(logic::op_lazy_or, trm_left, trm_right));
-}
-         | lazy_and:trm { return trm; }
-         ;
-
-lazy_and => exist:qntf LBRACE term:trm_left RBRACE AND lazy_and:trm_right {
-	return QuantifiedTerm(qntf, logic::term(logic::op_lazy_and, trm_left, trm_right));
-}
-         | not_expr:trm { return trm; }
-         ;
-
-not_expr => NOT not_expr:trm { return logic::term( logic::op_not, trm ); }
-          | PROP not_expr:trm { return logic::term( logic::op_prop, trm ); }
-		      | NOT quantifiers:qntf not_expr:trm {
-				return QuantifiedTerm(qntf, trm);
-				}
-		      | PROP quantifiers:qntf not_expr:trm { return QuantifiedTerm(qntf, trm); }
-          | member_apply_expr:trm { return trm; }
-          | apply_expr:trm { return trm; }
-          | LPAR term:trm RPAR { return trm; }
-          ;
-
-apply_args => apply_args:v COMMA term:t {
-	if (t.sel() == logic::op_unchecked) {
-		std::string ident = t.view_unchecked().id().at(0);
-		if (db_map.contains(ident))
-			v.push_back(logic::term(logic::op_debruijn, counter - 1 - db_map[ident]));
-	} else
-		v.push_back(t);
-	return v;
-}
-            | term:t {
-				if (t.sel() == logic::op_unchecked) {
-					std::string ident = t.view_unchecked().id().at(0);
-					if (db_map.contains(ident))
-						return { logic::term(logic::op_debruijn, counter - 1 - db_map[ident]) };
-				}
-				return {t};
-			}
-            ;
-
-apply_expr => IDENTIFIER:s LPAR apply_args:v RPAR {
-				auto f = logic::term(logic::op_unchecked, identifier() + s.c_str());
-				return logic::term(logic::op_apply, f, v.begin(), v.end());
-			}
-            ; 
-
-member_apply_expr => member_apply_expr:trm DOT IDENTIFIER:s {
-	// TODO check if f should be debruijn?
-	auto f = logic::term(logic::op_unchecked, identifier() + s.c_str());
-	if (trm.sel() == logic::op_unchecked) {
-		std::string ident = trm.view_unchecked().id().at(0);
-		if (db_map.contains(ident))
-			trm = logic::term(logic::op_debruijn, counter - 1 - db_map[ident]);
+iff_expr =>
+	iff_expr:trm_left IFF implication_expr:trm_right {
+		return logic::term(logic::op_equiv, trm_left, trm_right);
 	}
+	| iff_expr:trm_left IFF quantifiers:qntf implication_expr:trm_right {
+		return logic::term(logic::op_equiv, trm_left, QuantifiedTerm(qntf, trm_right));
+	}
+	| implication_expr:trm { return trm; }
+	;
 
-	return logic::term(logic::op_apply, f, {trm});
-}
-                   | member_apply_expr:trm DOT apply_expr:trm_right {
-					if (trm.sel() == logic::op_unchecked) {
-						std::string ident = trm.view_unchecked().id().at(0);
-						if (db_map.contains(ident))
-							trm = logic::term(logic::op_debruijn, counter - 1 - db_map[ident]);
-					}
+implication_expr =>
+	or_expr:trm_left IMPLY quantifiers:qntf implication_expr:trm_right {
+		return logic::term(logic::op_implies, trm_left, QuantifiedTerm(qntf, trm_right));
+	}
+	| or_expr:trm_left IMPLY implication_expr:trm_right {
+		return logic::term(logic::op_implies, trm_left, trm_right);
+	}
+	| or_expr:trm { return trm; }
+	;
 
-					return logic::term(logic::op_apply, trm_right, {trm});
-				}
-                   | IDENTIFIER:s { return logic::term(logic::op_unchecked, identifier() + s.c_str()); }
-                   ;
+or_expr =>
+	or_expr:trm_left OR quantifiers:qntf and_expr:trm_right {
+		return logic::term(logic::op_or, trm_left, QuantifiedTerm(qntf, trm_right));
+	}
+	| or_expr:trm_left OR and_expr:trm_right {
+		return logic::term(logic::op_or, trm_left, trm_right);
+	}
+	| and_expr:trm { return trm; }
+	;
 
-quantifiers => forall:q 
-             {
-                std::stack<std::pair<logic::selector, std::vector<logic::vartype>>> st;
-                st.push(q);
-                return st;
-             }
-             | quantifiers:qst forall:q {qst.push(q); return qst;}
-             | exist:q 
-             {
-                std::stack<std::pair<logic::selector, std::vector<logic::vartype>>> st;
-                st.push(q);
-                return st;
-             }
-             | quantifiers:qst exist:q {qst.push(q); return qst;}
-             ;
+and_expr =>
+	and_expr:trm_left AND quantifiers:qntf lazy_implication:trm_right {
+		return logic::term(logic::op_and, trm_left, QuantifiedTerm(qntf, trm_right));
+	}
+	| and_expr:trm_left AND lazy_implication:trm_right {
+		return logic::term(logic::op_and, trm_left, trm_right);
+	}
+	| lazy_implication:trm { return trm; }
+	;
 
-forall => LBRACKET vartypes:vars RBRACKET {return {logic::selector::op_forall, vars};}
-         ;
+lazy_implication =>
+	forall:qntf LBRACE term:trm_left RBRACE IMPLY lazy_or:trm_right {
+		return QuantifiedTerm(qntf, logic::term(logic::op_lazy_implies, trm_left, trm_right));
+	}
+	| lazy_or:trm { return trm; }
+	;
 
-exist => LT vartypes:vars GT {return {logic::selector::op_exists, vars};}
-       ;
+lazy_or =>
+	exist:qntf LBRACE term:trm_left RBRACE OR lazy_or:trm_right {
+		return QuantifiedTerm(qntf, logic::term(logic::op_lazy_or, trm_left, trm_right));
+	}
+	| lazy_and:trm { return trm; }
+	;
+
+lazy_and =>
+	exist:qntf LBRACE term:trm_left RBRACE AND lazy_and:trm_right {
+		return QuantifiedTerm(qntf, logic::term(logic::op_lazy_and, trm_left, trm_right));
+	}
+	| not_expr:trm { return trm; }
+	;
+
+not_expr =>
+	NOT not_expr:trm { return logic::term( logic::op_not, trm ); }
+	| PROP not_expr:trm { return logic::term( logic::op_prop, trm ); }
+	| NOT quantifiers:qntf not_expr:trm { return QuantifiedTerm(qntf, trm); }
+	| PROP quantifiers:qntf not_expr:trm { return QuantifiedTerm(qntf, trm); }
+	| member_apply_expr:trm { return trm; }
+	| apply_expr:trm { return trm; }
+	| LPAR term:trm RPAR { return trm; }
+	;
+
+apply_args =>
+	apply_args:v COMMA term:t {
+		if (t.sel() == logic::op_unchecked) {
+			std::string ident = t.view_unchecked().id().at(0);
+			if (db_map.contains(ident))
+				v.push_back(logic::term(logic::op_debruijn, counter - 1 - db_map[ident]));
+		} else
+			v.push_back(t);
+		return v;
+	}
+	| term:t {
+		if (t.sel() == logic::op_unchecked) {
+			std::string ident = t.view_unchecked().id().at(0);
+			if (db_map.contains(ident))
+				return { logic::term(logic::op_debruijn, counter - 1 - db_map[ident]) };
+		}
+		return {t};
+	}
+	;
+
+apply_expr =>
+	IDENTIFIER:s LPAR apply_args:v RPAR {
+		auto f = logic::term(logic::op_unchecked, identifier() + s.c_str());
+		return logic::term(logic::op_apply, f, v.begin(), v.end());
+	}
+	;
+
+member_apply_expr =>
+	member_apply_expr:trm DOT IDENTIFIER:s {
+		// TODO check if f should be debruijn?
+		auto f = logic::term(logic::op_unchecked, identifier() + s.c_str());
+		if (trm.sel() == logic::op_unchecked) {
+			std::string ident = trm.view_unchecked().id().at(0);
+			if (db_map.contains(ident))
+				trm = logic::term(logic::op_debruijn, counter - 1 - db_map[ident]);
+		}
+
+		return logic::term(logic::op_apply, f, {trm});
+	}
+	| member_apply_expr:trm DOT apply_expr:trm_right {
+		if (trm.sel() == logic::op_unchecked) {
+			std::string ident = trm.view_unchecked().id().at(0);
+			if (db_map.contains(ident))
+				trm = logic::term(logic::op_debruijn, counter - 1 - db_map[ident]);
+		}
+
+		return logic::term(logic::op_apply, trm_right, {trm});
+	}
+	| IDENTIFIER:s {
+		return logic::term(logic::op_unchecked, identifier() + s.c_str());
+	}
+	;
+
+quantifiers =>
+	forall:q {
+		std::stack<std::pair<logic::selector, std::vector<logic::vartype>>> st;
+		st.push(q);
+		return st;
+	}
+	| quantifiers:qst forall:q {
+		qst.push(q);
+		return qst;
+	}
+	| exist:q {
+		std::stack<std::pair<logic::selector, std::vector<logic::vartype>>> st;
+		st.push(q);
+		return st;
+	}
+	| quantifiers:qst exist:q {
+		qst.push(q);
+		return qst;
+	}
+	;
+
+forall =>
+	LBRACKET vartypes:vars RBRACKET {
+		return {logic::selector::op_forall, vars};
+	}
+	;
+
+exist =>
+	LT vartypes:vars GT {
+		return {logic::selector::op_exists, vars};
+	}
+	;
 
 %end
