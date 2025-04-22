@@ -58,6 +58,8 @@
 
 %parameter {tokenizer}              tok
 %parameter { logic::beliefstate }                  blfs
+%parameter {std::unordered_map<std::string, long long unsigned int>} db_map
+%parameter {long long unsigned int} counter
 
 %source { tok.read(); }
 

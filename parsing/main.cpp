@@ -14,7 +14,10 @@ int main () {
 
     tok.test();
 
-    auto prs = parsing::parser(tok, blfs);
+    std::unordered_map<std::string, long long unsigned int> mp;
+    long long unsigned int counter = 0;
+
+    auto prs = parsing::parser(tok, blfs, mp, counter);
     prs.maxrecovery = 1000000;
     //prs.debug = 1;
     
