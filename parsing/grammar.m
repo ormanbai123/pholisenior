@@ -107,6 +107,7 @@ vartypes => identifiers_colon_type:ict
             std::vector<logic::vartype> vars;
             for (auto var : ict.first) {
               vars.emplace_back(var, ict.second);
+			  db_map[var] = counter++;
             }
             return vars;
           }
@@ -114,6 +115,7 @@ vartypes => identifiers_colon_type:ict
           {
             for (auto var : ict.first) {
               vars.emplace_back(var, ict.second);
+			  db_map[var] = counter++;
             }
             return vars;
           }
@@ -232,8 +234,23 @@ not_expr => NOT not_expr:trm { return logic::term( logic::op_not, trm ); }
           | LPAR term:trm RPAR { return trm; }
           ;
 
-apply_args => term:t COMMA apply_args:v { v.push_back(t); return v; }
-            | term:t { return {t}; }
+apply_args => apply_args:v COMMA term:t {
+	if (t.sel() == logic::op_unchecked) {
+		std::string ident = t.view_unchecked().id().at(0);
+		if (db_map.contains(ident))
+			v.push_back(logic::term(logic::op_debruijn, counter - 1 - db_map[ident]));
+	} else
+		v.push_back(t);
+	return v;
+}
+            | term:t {
+				if (t.sel() == logic::op_unchecked) {
+					std::string ident = t.view_unchecked().id().at(0);
+					if (db_map.contains(ident))
+						return { logic::term(logic::op_debruijn, counter - 1 - db_map[ident]) };
+				}
+				return {t};
+			}
             ;
 
 apply_expr => IDENTIFIER:s LPAR apply_args:v RPAR {
@@ -242,8 +259,26 @@ apply_expr => IDENTIFIER:s LPAR apply_args:v RPAR {
 			}
             ; 
 
-member_apply_expr => member_apply_expr:trm DOT IDENTIFIER { return trm; } // TODO fix this
-                   | member_apply_expr:trm DOT apply_expr { return trm; } // TODO fix this
+member_apply_expr => member_apply_expr:trm DOT IDENTIFIER:s {
+	// TODO check if f should be debruijn?
+	auto f = logic::term(logic::op_unchecked, identifier() + s.c_str());
+	if (trm.sel() == logic::op_unchecked) {
+		std::string ident = trm.view_unchecked().id().at(0);
+		if (db_map.contains(ident))
+			trm = logic::term(logic::op_debruijn, counter - 1 - db_map[ident]);
+	}
+
+	return logic::term(logic::op_apply, f, {trm});
+}
+                   | member_apply_expr:trm DOT apply_expr:trm_right {
+					if (trm.sel() == logic::op_unchecked) {
+						std::string ident = trm.view_unchecked().id().at(0);
+						if (db_map.contains(ident))
+							trm = logic::term(logic::op_debruijn, counter - 1 - db_map[ident]);
+					}
+
+					return logic::term(logic::op_apply, trm_right, {trm});
+				}
                    | IDENTIFIER:s { return logic::term(logic::op_unchecked, identifier() + s.c_str()); }
                    ;
 
