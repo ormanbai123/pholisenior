@@ -272,6 +272,8 @@ apply_args =>
 			std::string ident = t.view_unchecked().id().at(0);
 			if (db_map.contains(ident))
 				v.push_back(logic::term(logic::op_debruijn, counter - 1 - db_map[ident]));
+			else
+				v.push_back(logic::term(logic::op_unchecked, identifier() + ident.c_str()));
 		} else
 			v.push_back(t);
 		return v;
@@ -289,6 +291,8 @@ apply_args =>
 apply_expr =>
 	IDENTIFIER:s LPAR apply_args:v RPAR {
 		auto f = logic::term(logic::op_unchecked, identifier() + s.c_str());
+		if (db_map.contains(s))
+			f = logic::term(logic::op_debruijn, counter - 1 - db_map[s]);
 		return logic::term(logic::op_apply, f, v.begin(), v.end());
 	}
 	;
@@ -296,6 +300,8 @@ apply_expr =>
 member_apply_expr =>
 	member_apply_expr:trm DOT IDENTIFIER:s {
 		auto f = logic::term(logic::op_unchecked, identifier() + s.c_str());
+		if (db_map.contains(s))
+			f = logic::term(logic::op_debruijn, counter - 1 - db_map[s]);
 		if (trm.sel() == logic::op_unchecked) {
 			std::string ident = trm.view_unchecked().id().at(0);
 			if (db_map.contains(ident))
