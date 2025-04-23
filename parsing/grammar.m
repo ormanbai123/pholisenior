@@ -10,7 +10,6 @@
 %symbol{std::vector<logic::type>} type_list
 %symbol{logic::term} iff_expr implication_expr or_expr and_expr not_expr lazy_implication lazy_or lazy_and
 
-%symbol{std::vector<std::pair<std::vector<std::string>, logic::type>>} idents_type_list 
 %symbol{std::string} IDENTIFIER
 %symbol{std::vector<std::string>} identifier_list 
 %symbol{std::pair<std::vector<std::string>, logic::type>} identifiers_colon_type
@@ -77,11 +76,21 @@ Statement =>
 	| def_specifier : def { blfs.append(std::move(def)); }
 	;
 
-idents_type_list =>
-	identifiers_colon_type:ict { return {ict}; }
-	| identifiers_colon_type:ict COMMA idents_type_list:v {
-		v.push_back(ict);
-		return v;
+vartypes =>
+	identifiers_colon_type:ict {
+		std::vector<logic::vartype> vars;
+		for (auto var : ict.first) {
+			vars.emplace_back(var, ict.second);
+			db_map[var] = counter++;
+		}
+		return vars;
+	}
+	| vartypes:vars COMMA identifiers_colon_type:ict {
+		for (auto var : ict.first) {
+			vars.emplace_back(var, ict.second);
+			db_map[var] = counter++;
+		}
+		return vars;
 	}
 	;
 
@@ -117,35 +126,16 @@ type_list =>
 	}
 	;
 
-vartypes =>
-	identifiers_colon_type:ict {
-		std::vector<logic::vartype> vars;
-		for (auto var : ict.first) {
-			vars.emplace_back(var, ict.second);
-			db_map[var] = counter++;
-		}
-		return vars;
-	}
-	| vartypes:vars COMMA identifiers_colon_type:ict {
-		for (auto var : ict.first) {
-			vars.emplace_back(var, ict.second);
-			db_map[var] = counter++;
-		}
-		return vars;
-	}
-	;
 
 //-----------------------structs---------------------------------
 
 struct_specifier =>
-	STRUCT IDENTIFIER:s ASSIGN idents_type_list:v {
+	STRUCT IDENTIFIER:s ASSIGN vartypes:vars {
 		std::cout << "STRUCT!\n";
 
 		logic::structdef strctseq;
-		for (auto it = v.end(); it-- != v.begin();) {
-			for (auto jt = it->first.end(); jt-- != it->first.begin();) {
-				strctseq.append(identifier() + (*jt), it->second);
-			}
+		for (auto var : vars){
+			strctseq.append(identifier() + var.pref, var.tp);
 		}
 		return logic::belief(logic::bel_struct, identifier() + s, strctseq);
 	}
@@ -305,7 +295,6 @@ apply_expr =>
 
 member_apply_expr =>
 	member_apply_expr:trm DOT IDENTIFIER:s {
-		// TODO check if f should be debruijn?
 		auto f = logic::term(logic::op_unchecked, identifier() + s.c_str());
 		if (trm.sel() == logic::op_unchecked) {
 			std::string ident = trm.view_unchecked().id().at(0);
