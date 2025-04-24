@@ -138,17 +138,9 @@ void logic::term::print( std::ostream& out ) const
 
    case op_let:
       {
-         auto l = view_let( ); 
-         out << sel( ) << "(";
-         for( size_t i = 0; i != l. size( ); ++ i )
-         {
-            if(i)
-               out << ", ";
-            else
-               out << " ";
-            out << l. var(i) << " := " << l. val(i); 
-         }
-         out << " in " << l. body( );
+         auto let = view_let( ); 
+         out << "let( " << let. var( ) << " := " << let. val( ); 
+         out << " in " << let. body( );
          out << " )"; 
       }
       return;
@@ -222,6 +214,14 @@ void logic::belief::print( std::ostream& out ) const
          out << name( ) << " := " << d. val( );
          out << " : " << d. tp( );
       }
+      return;
+
+   case bel_thm:
+      out << "theorem " << name( ) << " : " << view_thm( ). form( );
+      return;
+
+   case bel_asm:
+      out << "assumption " << name( ) << " : " << view_asm( ). form( );
       return;
 
    case bel_form:

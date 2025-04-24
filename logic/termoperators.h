@@ -33,6 +33,9 @@ namespace logic
    inline term lazy_implies( const term& t1, const term& t2 )
       { return term( op_lazy_implies, t1, t2 ); }
 
+   inline term lazy_or( const term& t1, const term& t2 )
+      { return term( op_lazy_or, t1, t2 ); }
+
    inline term equiv( const term& t1, const term& t2 )
       { return term( op_equiv, t1, t2 ); }
 
@@ -48,20 +51,14 @@ namespace logic
    inline term exists( std::initializer_list< vartype > vars, const term& t )
       { return term( op_exists, t, vars ); }
 
-#if 0
-   term operator + ( const term& t, size_t depth );
-      // This is the lifting operator.
-#endif
-
    inline term apply( const term& f, std::initializer_list< term > args )
       { return term( op_apply, f, args ); }
 
    inline term lambda( std::initializer_list< vartype > vars, const term& t )
       { return term( op_lambda, t, vars ); }
 
-   inline term let( std::initializer_list< std::pair< vartype, term >> defs,
-                    const term& body )
-      { return term( op_let, body, defs. begin( ), defs. end( )); }
+   inline term let( const vartype& var, const term& val, const term& body )
+      { return term( op_let, var, val, body ); }
 
 }
 
