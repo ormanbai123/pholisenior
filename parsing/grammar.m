@@ -173,7 +173,7 @@ def_specifier =>
 	;
 
 args_seq =>
-	LPAR vartypes:vars RPAR args_seq:st {
+	args_seq:st LPAR vartypes:vars RPAR {
 		st.push(vars);
 		return st;
 	}
